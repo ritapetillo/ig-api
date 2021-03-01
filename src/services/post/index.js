@@ -45,7 +45,7 @@ router.post("/upload", authorizeUser,  upload.single("post"), validate(schemas.P
 	try {
 		const new_post = new postModel({
 			...req.body,
-			post: req.file.path,
+			image: req.file.path,
 		})
 		const { _id } = await new_post.save()
 		res.status(200).send(`Resource created with id ${_id}`)

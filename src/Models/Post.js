@@ -6,7 +6,7 @@ const PostSchema = new mongoose.Schema({
         type: String,
         //max char validation added with joi 
     },
-    post: {
+    image: {
         type: String,
         required: true
     },
