@@ -22,7 +22,7 @@ authRoutes.post("/login", async (req, res, next) => {
       //send cookies
       if (!tokens) throw error;
       else {
-        const cookies = await generateCookies(tokens);
+        const cookies = await generateCookies(tokens, res);
         res.send(tokens);
       }
     }
@@ -43,7 +43,7 @@ authRoutes.post("/refresh", authorizeUser, async (req, res, next) => {
     //send cookies
     if (!tokens) throw error;
     else {
-      const cookies = await generateCookies(tokens);
+      const cookies = await generateCookies(tokens, res);
       res.send(tokens);
     }
   } catch (err) {
@@ -63,5 +63,29 @@ authRoutes.post("/logout", authorizeUser, async (req, res, next) => {
     next(error);
   }
 });
+
+//GOOGLE AUTH
+
+//LOGIN GOOGLE
+userRouter.get(
+  "/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
+
+userRouter.get(
+  "/google/callback",
+  passport.authenticate("google", { failureRedirect: "/login" }),
+  async (req, res, next) => {
+    try {
+      console.log(req.user);
+      const { tokens } = req.user;
+      const cookies = await generateCookies(tokens, res);
+      //verify credentials
+      res.redirect("http://localhost:3000");
+    } catch (err) {
+      next(err);
+    }
+  }
+);
 
 module.exports = authRoutes;

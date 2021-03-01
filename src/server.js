@@ -5,12 +5,15 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const mongoose = require("mongoose");
 const apiRoutes = require("./services");
-const listEndPoints = require("express-list-endpoints")
+const listEndPoints = require("express-list-endpoints");
+const passport = require("passport");
 const { PORT } = process.env;
+require("./Lib/auth/strategies");
 
 //MIDDLEWARES
 server.use(express.json());
 server.use(cookieParser());
+server.use(passport());
 server.use(
   cors({
     origin: [
@@ -29,7 +32,6 @@ server.use("/api", apiRoutes);
 //ERROR HANDLERS
 server.use(error_handler({ log: true, debug: true }));
 console.log(listEndPoints(server));
-
 
 //Connect to DB and server
 mongoose
