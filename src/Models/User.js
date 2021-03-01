@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+
 const bcrypt = require("bcryptjs");
 
 const UserSchema = new mongoose.Schema(
@@ -7,6 +8,7 @@ const UserSchema = new mongoose.Schema(
     lastname: String,
     username: String,
     imageUrl: String,
+
     email: {
       type: String,
       required: true,
@@ -21,8 +23,12 @@ const UserSchema = new mongoose.Schema(
     IGId: {
       type: String,
     },
+
     followers: [],
     following: [],
+
+    refreshToken: String,
+
   },
   {
     toJSON: {
@@ -38,7 +44,9 @@ const UserSchema = new mongoose.Schema(
         return ret;
       },
     },
-    timestamp: true,
+
+    timestamps: true,
+
   }
 );
 
