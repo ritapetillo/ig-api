@@ -71,7 +71,9 @@ UserRouter.get("/:ProfileId", async (req, res, next) => {
   try {
     const { ProfileId } = req.params;
 
-    const foundUser = await UserModel.findById(ProfileId);
+    const foundUser = await (await UserModel.findById(ProfileId)).populated(
+      "users"
+    );
 
     if (foundUser) res.status(200).send(foundUser);
 
@@ -122,5 +124,28 @@ UserRouter.delete("/:ProfileId", async (req, res, next) => {
     next(error);
   }
 });
+
+// UserRouter.post("/:ProfileId/followers", async (req, res, next) => {
+//   try {
+//     //TODO: Add profile in the array of followers
+//     //TODO: We need the person to follow
+//     // const user = await UserModel.findOneAndUpdate(
+//     //     {username: req.user.username}
+//     // )
+//     //TODO: We need to take that person who is following
+//     const newFollower = await UserModel.findById(ProfileId);
+//   } catch (error) {
+//     console.log(error);
+//     next(error);
+//   }
+// });
+
+// UserRouter.get("/followers", async (req,res,next) =>{
+//     try {
+//         const followers = await UserModel.find(req.query)
+//     } catch (error) {
+
+//     }
+// })
 
 module.exports = UserRouter;

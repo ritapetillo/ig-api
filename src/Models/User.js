@@ -8,7 +8,7 @@ const UserSchema = new mongoose.Schema(
     lastname: String,
     username: String,
     imageUrl: String,
-
+    bio: String,
     email: {
       type: String,
       required: true,
@@ -24,11 +24,12 @@ const UserSchema = new mongoose.Schema(
       type: String,
     },
 
-    followers: [],
-    following: [],
-
+    followers: [{ type: String, field: "username", ref: "users" }],
+    following: [{ type: String, field: "username", ref: "users" }],
+    followingTag: [
+      { type: mongoose.Schema.Types.ObjectId, ref: "followingTag" },
+    ],
     refreshToken: String,
-
   },
   {
     toJSON: {
@@ -46,7 +47,6 @@ const UserSchema = new mongoose.Schema(
     },
 
     timestamps: true,
-
   }
 );
 
@@ -59,5 +59,16 @@ UserSchema.methods.comparePass = async function (pass) {
     return false;
   }
 };
+
+UserSchema.pre("save", async function (next) {
+  const user = this;
+
+  const plainPW = user.password;
+
+  if (user.isModified("password")) {
+    user.password = await bcrypt.hash(plainPW, 10);
+  }
+  next();
+});
 
 module.exports = mongoose.model("users", UserSchema);
