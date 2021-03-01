@@ -17,6 +17,7 @@ const UserSchema = new mongoose.Schema(
     IGId: {
       type: String,
     },
+    refreshToken: String,
   },
   {
     toJSON: {
