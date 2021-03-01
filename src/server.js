@@ -5,6 +5,7 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const mongoose = require("mongoose");
 const apiRoutes = require("./services");
+const listEndPoints = require("express-list-endpoints")
 const { PORT } = process.env;
 
 //MIDDLEWARES
@@ -27,6 +28,8 @@ server.use("/api", apiRoutes);
 
 //ERROR HANDLERS
 server.use(error_handler({ log: true, debug: true }));
+console.log(listEndPoints(server));
+
 
 //Connect to DB and server
 mongoose
