@@ -31,7 +31,7 @@ authRoutes.post("/login", async (req, res, next) => {
   }
 });
 
-authRoutes.post("/refresh", authorizeUserm, async (req, res, next) => {
+authRoutes.post("/refresh", authorizeUser, async (req, res, next) => {
   try {
     //validate and deode refreh token
     const user = await verifyRefreshToken(req);
