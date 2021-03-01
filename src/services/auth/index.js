@@ -89,4 +89,26 @@ authRoutes.get(
   }
 );
 
+//LOGIN FACEBOOK
+authRoutes.get(
+  "/facebook",
+  passport.authenticate("facebook", { scope: ["email"] })
+);
+
+authRoutes.get(
+  "/facebook/callback",
+  passport.authenticate("facebook", { failureRedirect: "/login" }),
+  async (req, res, next) => {
+    try {
+      console.log("this is a user", req.user);
+      const { tokens } = req.user;
+      const cookies = await generateCookies(tokens, res);
+      //verify credentials
+      res.redirect("http://localhost:3000");
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
 module.exports = authRoutes;

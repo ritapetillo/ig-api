@@ -1,29 +1,32 @@
 const passport = require("passport");
-const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const FacebookStrategy = require("passport-facebook").Strategy;
 const User = require("../../../../Models/User");
-const { GOOGLE_CLIENT_ID, GOOGLE_SECRET_ID, BE_URI } = process.env;
+const { FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, BE_URI } = process.env;
 const { generateTokens } = require("../../tokens");
 
 passport.use(
-  "google",
-  new GoogleStrategy(
+  "facebook",
+  new FacebookStrategy(
     {
-      clientID: GOOGLE_CLIENT_ID,
-      clientSecret: GOOGLE_SECRET_ID,
-      callbackURL: "http://localhost:3001/api/auth/google/callback",
+      clientID: FACEBOOK_APP_ID,
+      clientSecret: FACEBOOK_APP_SECRET,
+      callbackURL: "http://localhost:3001/api/auth/facebook/callback",
+      profileFields: ["id", "displayName", "email", "picture", "name"],
     },
     async function (accessToken, refreshToken, profile, done) {
       try {
         console.log(profile);
-        const { email, given_name, family_name, picture } = profile._json;
+
+        const { email, first_name, last_name } = profile._json;
         //verify if the user is already registered
         const user = await User.findOne({ email });
+        console.log(user);
         if (!user) {
           //register the user
           const newUser = new User({
-            name: given_name,
-            lastname: family_name,
-            imageUrl: picture,
+            name: first_name,
+            lastname: last_name,
+            imageUrl: profile.photos[0].value,
             email,
             facebookId: profile.id,
             username: email,

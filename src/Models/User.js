@@ -19,7 +19,7 @@ const UserSchema = new mongoose.Schema(
     googleId: {
       type: String,
     },
-    IGId: {
+    facebookId: {
       type: String,
     },
 

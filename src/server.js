@@ -9,6 +9,7 @@ const listEndPoints = require("express-list-endpoints");
 const passport = require("passport");
 const { PORT } = process.env;
 require("./Lib/auth/strategies/google");
+require("./Lib/auth/strategies/facebook");
 
 //MIDDLEWARES
 server.use(express.json());
