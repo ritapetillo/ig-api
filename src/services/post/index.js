@@ -1,6 +1,8 @@
 const router = require("express").Router()
-const postModel = require("./schema")
+const postModel = require("../../Models/Post")
 const upload = require("../../Lib/cloudinary/posts")
+const validate = require("../../Lib/validation/validationMiddleware")
+const schemas = require("../../Lib/validation/validationSchema")
 
 router.get("/", async (req, res, next) => {
 	//gets all posts
@@ -32,11 +34,12 @@ router.get("/:userId", async (req, res, next) => {
 	}
 })
 
-router.post("/upload", upload.single("post"), async (req, res, next) => {
+router.post("/upload",  upload.single("post"), validate(schemas.PostSchema), async (req, res, next) => {
+    console.log(req.body)
 	try {
 		const new_post = new postModel({
 			...req.body,
-			image: req.file.path,
+			post: req.file.path,
 		})
 		const { _id } = await new_post.save()
 		res.status(200).send(`Resource created with id ${_id}`)

@@ -1,16 +1,17 @@
 
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
+const CommentModel = require("./Comment");
 const PostSchema = new mongoose.Schema({
     caption: {
         type: String,
         //max char validation added with joi 
     },
-    image: {
+    post: {
         type: String,
         required: true
     },
     comments: {
-        type: Array
+        type: [{ type: mongoose.Schema.Types.ObjectId, ref: "comments" }]
     },
     authorId: {
         type: String,

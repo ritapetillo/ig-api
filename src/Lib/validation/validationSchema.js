@@ -1,6 +1,5 @@
 const Joi = require("joi")
 const schemas = {
-s
   // userSchema: Joi.object().keys({
   //   name: Joi.string().required(),
   //   lastName: Joi.string().required(),
@@ -26,11 +25,7 @@ s
 	PostSchema: Joi.object().keys({
 		_id: Joi.string(),
 		caption: Joi.string().max(2200),
-		image: Joi.string().required(),
-		comments: Joi.array( /*in here I need to add the comment schema!*/ ), 
-		authorId: Joi.string().required(), 
-		createdAt: Joi.date().required(),
-		updatedAt: Joi.date().required(),
+		post: Joi.string().required()
 	})
 }
 
