@@ -24,12 +24,12 @@ const schemas = {
   }),
 	PostSchema: Joi.object().keys({
 		_id: Joi.string(),
-		caption: Joi.string().max(2200),
-		image: Joi.string().required(),
-		comments: Joi.array( /*in here I need to add the comment schema!*/ ), 
-		authorId: Joi.string().required(), 
-		createdAt: Joi.date().required(),
-		updatedAt: Joi.date().required(),
+		caption: Joi.string().max(2200).required(),
+		image: Joi.string(),
+		comments: Joi.array(), 
+		authorId: Joi.string(), 
+		createdAt: Joi.date(),
+		updatedAt: Joi.date(),
 	})
 }
 

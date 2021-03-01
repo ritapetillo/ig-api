@@ -1,5 +1,6 @@
 
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
+const CommentModel = require("./Comment");
 const PostSchema = new mongoose.Schema({
     caption: {
         type: String,
@@ -10,10 +11,10 @@ const PostSchema = new mongoose.Schema({
         required: true
     },
     comments: {
-        type: Array
+        type: [{ type: mongoose.Schema.Types.ObjectId, ref: "comments" }]
     },
     authorId: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId, ref: "user", 
         required: true
     }
 },
