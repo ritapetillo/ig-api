@@ -21,8 +21,10 @@ authRoutes.post("/login", async (req, res, next) => {
       const tokens = await generateTokens(user);
       //send cookies
       if (!tokens) throw error;
-      else const cookies = await generateCookies(tokens);
-      res.send(tokens);
+      else {
+        const cookies = await generateCookies(tokens);
+        res.send(tokens);
+      }
     }
   } catch (err) {
     const error = new Error("Wrong Credentials");
@@ -40,8 +42,10 @@ authRoutes.post("/refresh", authorizeUser, async (req, res, next) => {
     const tokens = await generateTokens(user);
     //send cookies
     if (!tokens) throw error;
-    else const cookies = await generateCookies(tokens);
-    res.send(tokens);
+    else {
+      const cookies = await generateCookies(tokens);
+      res.send(tokens);
+    }
   } catch (err) {
     const error = new Error("User not authorized. Please login in");
     error.code = 401;
