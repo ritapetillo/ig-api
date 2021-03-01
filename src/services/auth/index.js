@@ -10,8 +10,11 @@ const authorizeUser = require("../../Middlewares/auth");
 const authRoutes = express.Router();
 const User = require("../../Models/User");
 const passport = require("passport");
+const loginSchema = require("../../Lib/validation/validationSchema")
+  .loginSchema;
+const validate = require("../../Lib/validation/validationMiddleware");
 
-authRoutes.post("/login", async (req, res, next) => {
+authRoutes.post("/login", validate(loginSchema), async (req, res, next) => {
   try {
     const { username, password } = req.body;
     const user = await User.findOne({ username });

@@ -10,10 +10,10 @@ const schemas = {
   //   title: Joi.string().required(),
   //   area: Joi.string().required(),
   // }),
-  // loginSchema: Joi.object().keys({
-  //   username: Joi.string().required(),
-  //   password: Joi.string().min(6).required(),
-  // }),
+  loginSchema: Joi.object().keys({
+    username: Joi.string().required(),
+    password: Joi.string().min(6).required(),
+  }),
   commentSchema: Joi.object().keys({
     _id: Joi.string(),
     text: Joi.string().required(),
