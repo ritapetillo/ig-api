@@ -1,7 +1,7 @@
 const passport = require("passport");
 const FacebookStrategy = require("passport-facebook").Strategy;
 const User = require("../../../../Models/User");
-const { FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, BE_URI } = process.env;
+const { FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, BE_URI, FE_URI } = process.env;
 const { generateTokens } = require("../../tokens");
 
 passport.use(
@@ -10,7 +10,7 @@ passport.use(
     {
       clientID: FACEBOOK_APP_ID,
       clientSecret: FACEBOOK_APP_SECRET,
-      callbackURL: "http://localhost:3001/api/auth/facebook/callback",
+      callbackURL: `${BE_URI}/api/auth/facebook/callback`,
       profileFields: ["id", "displayName", "email", "picture", "name"],
     },
     async function (accessToken, refreshToken, profile, done) {

@@ -13,6 +13,7 @@ const passport = require("passport");
 const loginSchema = require("../../Lib/validation/validationSchema")
   .loginSchema;
 const validate = require("../../Lib/validation/validationMiddleware");
+const { FE_URI } = process.env;
 
 authRoutes.post("/login", validate(loginSchema), async (req, res, next) => {
   try {
@@ -85,7 +86,7 @@ authRoutes.get(
       const { tokens } = req.user;
       const cookies = await generateCookies(tokens, res);
       //verify credentials
-      res.redirect("http://localhost:3000");
+      res.redirect(FE_URI);
     } catch (err) {
       next(err);
     }
@@ -107,7 +108,7 @@ authRoutes.get(
       const { tokens } = req.user;
       const cookies = await generateCookies(tokens, res);
       //verify credentials
-      res.redirect("http://localhost:3000");
+      res.redirect(`${FE_URI}#`);
     } catch (err) {
       next(err);
     }

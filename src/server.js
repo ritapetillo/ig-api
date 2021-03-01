@@ -12,6 +12,8 @@ require("./Lib/auth/strategies/google");
 require("./Lib/auth/strategies/facebook");
 
 //MIDDLEWARES
+server.set("trust proxy", 1);
+server.enable("trust proxy");
 server.use(express.json());
 server.use(cookieParser());
 server.use(passport.initialize());
