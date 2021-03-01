@@ -1,7 +1,7 @@
-const passport = require('passport')
-const GoogleStrategy = require('passport-google-oauth20').Strategy
-const User = require('../../../../Models/User')
-const {GOOGLE_CLIENT_ID,GOOGLE_SECRET_ID,BE_URI}
+const passport = require("passport");
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const User = require("../../../../Models/User");
+const { GOOGLE_CLIENT_ID, GOOGLE_SECRET_ID, BE_URI } = process.env;
 passport.use(
   "google",
   new GoogleStrategy(
@@ -38,7 +38,6 @@ passport.use(
         console.log(err);
         done(err, undefined);
       }
-
     }
   )
 );

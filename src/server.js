@@ -8,12 +8,12 @@ const apiRoutes = require("./services");
 const listEndPoints = require("express-list-endpoints");
 const passport = require("passport");
 const { PORT } = process.env;
-require("./Lib/auth/strategies");
+require("./Lib/auth/strategies/google");
 
 //MIDDLEWARES
 server.use(express.json());
 server.use(cookieParser());
-server.use(passport());
+server.use(passport.initialize());
 server.use(
   cors({
     origin: [

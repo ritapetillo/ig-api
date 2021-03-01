@@ -9,6 +9,7 @@ const {
 const authorizeUser = require("../../Middlewares/auth");
 const authRoutes = express.Router();
 const User = require("../../Models/User");
+const passport = require("passport");
 
 authRoutes.post("/login", async (req, res, next) => {
   try {
@@ -67,12 +68,12 @@ authRoutes.post("/logout", authorizeUser, async (req, res, next) => {
 //GOOGLE AUTH
 
 //LOGIN GOOGLE
-userRouter.get(
+authRoutes.get(
   "/google",
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
-userRouter.get(
+authRoutes.get(
   "/google/callback",
   passport.authenticate("google", { failureRedirect: "/login" }),
   async (req, res, next) => {
