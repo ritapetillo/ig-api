@@ -6,6 +6,8 @@ const postModel = require("../../Models/Post")
 const upload = require("../../Lib/cloudinary/posts")
 const validate = require("../../Lib/validation/validationMiddleware")
 const authorizeUser = require("../../Middlewares/auth")
+//error
+const ApiError = require("../../Lib/ApiError");
 
 router.get("/", authorizeUser, async (req, res, next) => {
 	//gets all posts
@@ -15,7 +17,7 @@ router.get("/", authorizeUser, async (req, res, next) => {
 			if (posts.length > 0) {
 				res.status(200).send(posts)
 			} else res.send(204) //no content}
-		} else res.send(401)
+		} else throw new ApiError(401, "You are unauthorized.")
 	} catch (e) {
 		next(e)
 	}
@@ -35,7 +37,7 @@ router.get("/:userId", async (req, res, next) => {
 				//if there are posts
 				res.status(200).send(user_feed)
 			} else res.send(204) //if there are no posts
-		} else res.send(404) //if there is no user
+		} else throw new ApiError(404, "No user found") //if there is no user
 	} catch (e) {
 		next(e)
 	}
@@ -57,7 +59,7 @@ router.post(
 				const { _id } = await new_post.save()
 				res.status(200).send(`Resource created with id ${_id}`)
 			}
-			 else res.send(401)
+			 else throw new ApiError(401, "You are unauthorized.")
 		} catch (e) {
 			next(e)
 		}
@@ -76,7 +78,7 @@ router.put("/:postId", authorizeUser, async (req, res, next) => {
 			if (edited_post) {
 				res.status(200).send("Updated succesfully!")
 			}
-		} else res.send(401)
+		} else throw new ApiError(401, "You are unauthorized.")
 	} catch (e) {
 		next(e)
 	}
@@ -88,8 +90,8 @@ router.delete("/:postId", authorizeUser, async (req, res, next) => {
 		if (req.user.username) {
 			const delete_post = await postModel.findByIdAndDelete(req.params.postId)
 			if (delete_post) res.status(200).send("Deleted")
-			else res.send(404) //no post was found
-		} else res.send(401)
+			else throw new ApiError(404, "No post found") //no post was found
+		} else throw new ApiError(401, "You are unauthorized.")
 	} catch (e) {
 		next(e)
 	}
