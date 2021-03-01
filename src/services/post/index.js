@@ -8,10 +8,9 @@ const validate = require("../../Lib/validation/validationMiddleware")
 const authorizeUser = require("../../Middlewares/auth")
 
 router.get("/", authorizeUser, async (req, res, next) => {
-	console.log(req)
 	//gets all posts
 	try {
-		if (req.user) { //checks if the middleware returned a user
+		if (req.user.username) { //checks if the middleware returned a user
 			const posts = await postModel.find().sort({ createdAt: -1 }) //how to add pagination to posts?
 			if (posts.length > 0) {
 				res.status(200).send(posts)
@@ -50,12 +49,15 @@ router.post(
 	async (req, res, next) => {
 		//adds post
 		try {
-			const new_post = new postModel({
-				...req.body,
-				image: req.file.path,
-			})
-			const { _id } = await new_post.save()
-			res.status(200).send(`Resource created with id ${_id}`)
+			if (req.body.username) {
+				const new_post = new postModel({
+					...req.body,
+					image: req.file.path,
+				})
+				const { _id } = await new_post.save()
+				res.status(200).send(`Resource created with id ${_id}`)
+			}
+			 else res.send(401)
 		} catch (e) {
 			next(e)
 		}
@@ -65,14 +67,16 @@ router.post(
 router.put("/:postId", authorizeUser, async (req, res, next) => {
 	//edit post
 	try {
-		const edited_post = await postModel.findByIdAndUpdate(
-			req.params.postId,
-			req.body,
-			{ runValidators: true }
-		)
-		if (edited_post) {
-			res.status(200).send("Updated succesfully!")
-		}
+		if (req.user.username) {
+			const edited_post = await postModel.findByIdAndUpdate(
+				req.params.postId,
+				req.body,
+				{ runValidators: true }
+			)
+			if (edited_post) {
+				res.status(200).send("Updated succesfully!")
+			}
+		} else res.send(401)
 	} catch (e) {
 		next(e)
 	}
@@ -81,9 +85,11 @@ router.put("/:postId", authorizeUser, async (req, res, next) => {
 router.delete("/:postId", authorizeUser, async (req, res, next) => {
 	//delete post
 	try {
-		const delete_post = await postModel.findByIdAndDelete(req.params.postId)
-		if (delete_post) res.status(200).send("Deleted")
-		else res.send(404) //no post was found
+		if (req.user.username) {
+			const delete_post = await postModel.findByIdAndDelete(req.params.postId)
+			if (delete_post) res.status(200).send("Deleted")
+			else res.send(404) //no post was found
+		} else res.send(401)
 	} catch (e) {
 		next(e)
 	}
