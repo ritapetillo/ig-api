@@ -6,21 +6,20 @@ const q2m = require("query-to-mongo");
 
 //Model
 const CommentModel = require("../../Models/Comment");
+const UserModel = require("../../Models/User");
 
 //Middlewares
 const schemas = require("../../Lib/validation/validationSchema");
-const validationMiddleware = require(
-  "../../Lib/validation/validationMiddleware"
-);
-// const { isAuthorized } = require("../../middlewares/authorization");
+const validationMiddleware = require("../../Lib/validation/validationMiddleware");
+const authorizeUser = require("../../Middlewares/auth");
 
 //Error Handling
 const ApiError = require("../../Lib/ApiError");
 
 //post new comment
 commentRoutes.post(
-  "/",
-  validationMiddleware(schemas.commentSchema),
+  "/",authorizeUser,
+  validationMiddleware(schemas.commentSchema), 
   async (req, res, next) => {
     try {
       const user = req.user;
@@ -57,15 +56,15 @@ commentRoutes.get("/:postId", async (req, res, next) => {
 
 //owner to edit their own comment on a specific post
 commentRoutes.put(
-  "/:commentId",
+  "/:commentId", authorizeUser,
   validationMiddleware(schemas.commentSchema),
   async (req, res, next) => {
     const { commentId } = req.params;
     const user = req.user;
     const commentToEdit = await CommentModel.findById(commentId);
     try {
-  if (commentToEdit.userId != user.id)
-      throw new ApiError(403, `Only the owner of this comment can edit`);
+      if (commentToEdit.userId != user.id)
+        throw new ApiError(403, `Only the owner of this comment can edit`);
       const updatedComment = await CommentModel.findByIdAndUpdate(
         commentId,
         req.body,
@@ -83,7 +82,7 @@ commentRoutes.put(
 );
 
 //owner to delete their own comment on a specific post
-commentRoutes.delete("/:commentId", async (req, res, next) => {
+commentRoutes.delete("/:commentId", authorizeUser, async (req, res, next) => {
   const { commentId } = req.params;
   const user = req.user;
 
@@ -108,5 +107,49 @@ commentRoutes.delete("/:commentId", async (req, res, next) => {
     next(error);
   }
 });
+
+//Like a comment
+commentRoutes.post("/:commentId/like", async (req, res, next) => {
+  try {
+    const { commentId } = req.params;
+    const userId = req.user.id;
+    if (!(await CommentModel.findById(commentId)))
+      throw new ApiError(404, `Comment not found`);
+    const user = await UserModel.findByIdAndUpdate(
+      userId,
+      { $addToSet: { likedComments: commentId } },
+      { runValidators: true, new: true }
+    );
+    const likedComment = await CommentModel.findByIdAndUpdate(commentId, {
+      $addToSet: { likes: userId },
+    });
+    res.status(200).send({ user });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
+
+//Unlike a comment
+commentRoutes.put("/:commentId/unlike", async (req, res, next) => {
+    try {
+      const { commentId } = req.params;
+      const userId = req.user.id;
+      if (!(await CommentModel.findById(commentId)))
+        throw new ApiError(404, `Comment not found`);
+      const user = await UserModel.findByIdAndUpdate(
+        userId,
+        { $pull: { likedComments: commentId } },
+        { runValidators: true, new: true }
+      );
+      const likedComment = await CommentModel.findByIdAndUpdate(commentId, {
+        $pull: { likes: userId },
+      });
+      res.status(200).send({ user });
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  });
 
 module.exports = commentRoutes;
