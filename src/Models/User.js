@@ -17,6 +17,10 @@ const UserSchema = new mongoose.Schema(
     IGId: {
       type: String,
     },
+    followers: [],
+    following: [],
+    likedComments:[{type: mongoose.Schema.Types.ObjectId, ref: "comments"}],
+
     refreshToken: String,
   },
   {

@@ -6,6 +6,7 @@ const q2m = require("query-to-mongo");
 
 //Model
 const CommentModel = require("../../Models/Comment");
+const UserModel = require("../../Models/User");
 
 //Middlewares
 const schemas = require("../../Lib/validation/validationSchema");
@@ -106,5 +107,49 @@ commentRoutes.delete("/:commentId", authorizeUser, async (req, res, next) => {
     next(error);
   }
 });
+
+//Like a comment
+commentRoutes.post("/:commentId/like", async (req, res, next) => {
+  try {
+    const { commentId } = req.params;
+    const userId = req.user.id;
+    if (!(await CommentModel.findById(commentId)))
+      throw new ApiError(404, `Comment not found`);
+    const user = await UserModel.findByIdAndUpdate(
+      userId,
+      { $addToSet: { likedComments: commentId } },
+      { runValidators: true, new: true }
+    );
+    const likedComment = await CommentModel.findByIdAndUpdate(commentId, {
+      $addToSet: { likes: userId },
+    });
+    res.status(200).send({ user });
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
+
+//Unlike a comment
+commentRoutes.put("/:commentId/unlike", async (req, res, next) => {
+    try {
+      const { commentId } = req.params;
+      const userId = req.user.id;
+      if (!(await CommentModel.findById(commentId)))
+        throw new ApiError(404, `Comment not found`);
+      const user = await UserModel.findByIdAndUpdate(
+        userId,
+        { $pull: { likedComments: commentId } },
+        { runValidators: true, new: true }
+      );
+      const likedComment = await CommentModel.findByIdAndUpdate(commentId, {
+        $pull: { likes: userId },
+      });
+      res.status(200).send({ user });
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  });
 
 module.exports = commentRoutes;
