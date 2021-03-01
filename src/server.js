@@ -8,6 +8,8 @@ const apiRoutes = require("./services");
 const { PORT } = process.env;
 
 //MIDDLEWARES
+server.set("trust proxy", 1);
+server.enable("trust proxy");
 server.use(express.json());
 server.use(cookieParser());
 server.use(
