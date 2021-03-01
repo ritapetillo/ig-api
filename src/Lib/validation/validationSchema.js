@@ -16,7 +16,7 @@ const schemas = {
   // }),
   commentSchema: Joi.object().keys({
     _id: Joi.string(),
-    text: Joi.string().required(),
+    text: Joi.string().required(1000),
     userId: Joi.string(),
     postId: Joi.string(),
     createdAt: Joi.date(),
