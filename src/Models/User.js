@@ -15,7 +15,6 @@ const UserSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
     },
     googleId: {
       type: String,
@@ -28,7 +27,6 @@ const UserSchema = new mongoose.Schema(
     following: [],
 
     refreshToken: String,
-
   },
   {
     toJSON: {
@@ -46,7 +44,6 @@ const UserSchema = new mongoose.Schema(
     },
 
     timestamps: true,
-
   }
 );
 
