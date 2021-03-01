@@ -63,9 +63,8 @@ router.put("/:postId", async (req, res, next) => {
 router.delete("/:postId", async (req, res, next) => {
 	try {
 		const delete_post = await postModel.findByIdAndDelete(req.params.postId)
-		if (delete_post) {
-			res.status(200).send("Deleted")
-		}
+        if (delete_post) res.status(200).send("Deleted")
+		else res.send(404) //no post was found
 	} catch (e) {
 		next(e)
 	}
