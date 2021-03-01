@@ -24,7 +24,7 @@ const schemas = {
   }),
 	PostSchema: Joi.object().keys({
 		_id: Joi.string(),
-		caption: Joi.string().max(2200),
+		caption: Joi.string().max(2200).required(),
 		image: Joi.string(),
 		comments: Joi.array(), 
 		authorId: Joi.string(), 
