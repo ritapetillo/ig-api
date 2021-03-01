@@ -37,6 +37,8 @@ const generateTokens = async (user) => {
       REFRESH_TOKEN_SECRET,
       EXPIRATION_REFRESH_TOKEN
     );
+    user.refreshToken = refreshToken;
+    user.save();
     return { accessToken, refreshToken };
   } catch (err) {
     console.log(err);
@@ -56,9 +58,10 @@ const verifyAccessToken = async (token) => {
   }
 };
 
-const verifyRefreshToken = async (token) => {
+const verifyRefreshToken = async (req) => {
   try {
-    const user = await decodeJWT(toekn, REFRESH_TOKEN_SECRET);
+    const { refreshToken } = req.cookies;
+    const user = await decodeJWT(refreshToken, REFRESH_TOKEN_SECRET);
     if (!user) return null;
     const { username } = user;
     const savedRefreshToken = await User.findOne({
@@ -76,4 +79,4 @@ const verifyRefreshToken = async (token) => {
   }
 };
 
-module.exports = { generateTokens, verifyAccessToken };
+module.exports = { generateTokens, verifyAccessToken, verifyRefreshToken };

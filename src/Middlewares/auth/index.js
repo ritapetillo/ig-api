@@ -1,5 +1,6 @@
 const { error } = require("console");
 const { verifyAccessToken } = require("../../Lib/auth/tokens");
+const authRoutes = require("../../services/auth");
 
 const authorizeUser = async (req, res, next) => {
   try {
@@ -16,3 +17,5 @@ const authorizeUser = async (req, res, next) => {
     next(error);
   }
 };
+
+module.exports = authorizeUser;
