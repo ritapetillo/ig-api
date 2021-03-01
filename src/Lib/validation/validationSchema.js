@@ -14,14 +14,14 @@ const schemas = {
   //   username: Joi.string().required(),
   //   password: Joi.string().min(6).required(),
   // }),
-  // commentSchema: Joi.object().keys({
-  //   _id: Joi.string(),
-  //   text: Joi.string().required(),
-  //   userId: Joi.string(),
-  //   postId: Joi.string().required(),
-  //   createdAt: Joi.date(),
-  //   updatedAt: Joi.date(),
-  // }),
+  commentSchema: Joi.object().keys({
+    _id: Joi.string(),
+    text: Joi.string().required(),
+    userId: Joi.string(),
+    postId: Joi.string(),
+    createdAt: Joi.date(),
+    updatedAt: Joi.date(),
+  }),
   // PostSchema: Joi.object().keys({
   //   _id: Joi.string(),
   //   text: Joi.string().required(),
