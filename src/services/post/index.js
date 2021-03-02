@@ -38,6 +38,7 @@ router.get("/", authorizeUser, async (req, res, next) => {
 router.get("/me", authorizeUser, async (req, res, next) => {
   //gets all posts
   try {
+	console.log("req.user", req.user)
     if (req.user) {
       //checks if the middleware returned a user
       console.log(req.user);

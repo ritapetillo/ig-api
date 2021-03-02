@@ -63,7 +63,7 @@ commentRoutes.put(
     const user = req.user;
     const commentToEdit = await CommentModel.findById(commentId);
     try {
-      if (commentToEdit.userId != user.id)
+      if (commentToEdit.userId != user._id)
         throw new ApiError(403, `Only the owner of this comment can edit`);
       const updatedComment = await CommentModel.findByIdAndUpdate(
         commentId,

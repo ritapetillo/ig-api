@@ -35,11 +35,11 @@ UserRouter.post(
   authorizeUser,
   cloudinaryParser.single("photo"),
   async (req, res, next) => {
-    const { id } = req.user;
+    const { _id } = req.user;
     try {
       const image = req.file && req.file.path;
       const editedUser = await UserModel.findByIdAndUpdate(
-        id,
+        _id,
         { $set: { image } },
         { runValidators: true, new: true }
       );
@@ -86,9 +86,9 @@ UserRouter.put(
     const { _id } = req.user;
     const editedUser = await UserModel.findById(_id);
     try {
-      if (editedUser != user)
+      if (editedUser._id != _id)
         throw new ApiError(403, `Only the owner of this profile can edit`);
-      const updatedProfile = await UserModel.findByIdAndUpdate(id, req.body, {
+      const updatedProfile = await UserModel.findByIdAndUpdate(_id, req.body, {
         runValidators: true,
         new: true,
       });
@@ -119,7 +119,7 @@ UserRouter.post("/follow/:followId", authorizeUser, async (req, res, next) => {
   try {
     const { followId } = req.params;
     const userId = req.user._id;
-    if (!(await User.findById(followId)))
+    if (!(await UserModel.findById(followId)))
       return next(
         new Error("The user you are trying to follow, does not exist")
       );
