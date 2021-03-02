@@ -2,8 +2,13 @@ const { disconnect } = require("mongoose");
 const socketio = require("socket.io");
 const cookieParser = require("socket.io-cookie-parser");
 const { verifyAccessToken } = require("./Lib/auth/tokens");
-const { saveMessage, disconnectUser } = require("./Lib/socket");
+const {
+  saveMessage,
+  disconnectUser,
+  findChatsByPartecipants,
+} = require("./Lib/socket");
 const { getAuthenticatedUser } = require("./Middlewares/socket");
+const ChatRoom = require("./Models/ChatRoom");
 const User = require("./Models/User");
 
 const createSocketServer = (server) => {
@@ -14,17 +19,38 @@ const createSocketServer = (server) => {
 
   io.on("connection", async (socket) => {
     const user = socket.request.user;
-    socket.on("joinRoom", (data) => {
-      const { room } = data;
-      socket.join(room);
 
-      socket.on("sendMessage", async (message) => {
-        //save the message
-        const newMessage = await saveMessage(message);
-        //emit the message to the room
-        const { roomId } = message;
-        io.to(roomId).emit("message", message);
+    //connect the user to all previous conversations
+
+    socket.on("joinRoom", async () => {
+      const userRooms = await findChatsByPartecipants(user._id);
+
+      userRooms.map((room) => {
+        socket.join(room._id);
       });
+    });
+
+    // socket.on("leaveRoom", async () => {
+    //   const userRooms = await findChatsByPartecipants(user._id);
+    //   userRooms.map((room) => {
+    //     socket.leave(room._id);
+    //   });
+    // });
+
+    socket.on("addedToChat", async (id, roomId) => {
+      //find the user by id
+      const userToAdd = await User.findById(id);
+      if (userToAdd.socketId) {
+        io.sockets.connected[userToAdd.socketId].join(roomId);
+      }
+      //check if the user has the socketId, if yes connect the user to roomId
+    });
+    socket.on("sendMessage", async (message) => {
+      //save the message
+      const newMessage = await saveMessage(message);
+      //emit the message to the room
+      const { roomId } = message;
+      io.to(roomId).emit("message", message);
     });
 
     socket.on("typing", (roomId) => {
@@ -32,9 +58,14 @@ const createSocketServer = (server) => {
     });
 
     socket.on("disconnect", async () => {
+      //remove the user from all the rooms
+      const rooms = io.sockets.adapter.sids[socket.id];
+      rooms.map((room) => {
+        socket.leave(room);
+      });
+
       //remove socketId
       const disconect = await disconnectUser();
-      console.log(disconnect);
     });
   });
 };

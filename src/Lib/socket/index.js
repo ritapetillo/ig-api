@@ -36,4 +36,13 @@ const disconnectUser = async (user) => {
   }
 };
 
-module.exports = { saveMessage,disconnectUser };
+const findChatsByPartecipants = async (id) => {
+  try {
+    const chats = await ChatRoom.find({ participants: { $in: [id] } });
+    return chats;
+  } catch (err) {
+    return null;
+  }
+};
+
+module.exports = { saveMessage, disconnectUser, findChatsByPartecipants };
