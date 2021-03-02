@@ -15,7 +15,6 @@ require("./Lib/auth/strategies/facebook");
 server.set("trust proxy", 1);
 server.enable("trust proxy");
 server.use(express.json());
-server.use(cookieParser());
 server.use(passport.initialize());
 server.use(
   cors({
@@ -28,6 +27,7 @@ server.use(
     exposedHeaders: ["set-cookie"],
   })
 );
+server.use(cookieParser());
 
 //ROUTE
 server.use("/api", apiRoutes);
