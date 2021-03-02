@@ -78,7 +78,6 @@ postRoutes.get("/user/:username", async (req, res, next) => {
     const { username } = req.params;
     if (username) {
       const user = await UserModel.findOne({ username: username });
-      console.log("userXXXXX", user);
       if (!user) throw new ApiError(404, "no user found");
       {
         const posts = await PostModel.find({ authorId: user._id });
@@ -100,7 +99,6 @@ postRoutes.post(
   async (req, res, next) => {
     try {
       const user = req.user._id;
-      console.log("user", user);
       if (user) {
         const image = req.file && req.file.path;
         console.log("image", image);

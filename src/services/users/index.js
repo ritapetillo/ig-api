@@ -87,7 +87,7 @@ UserRouter.put(
     const editedUser = await UserModel.findById(_id);
     try {
       if (editedUser._id != _id)
-        throw new ApiError(403, `Only the owner of this profile can edit`);
+        throw new ApiError(401, `Only the owner of this profile can edit`);
       const updatedProfile = await UserModel.findByIdAndUpdate(_id, req.body, {
         runValidators: true,
         new: true,
