@@ -18,14 +18,14 @@ const ApiError = require("../../Lib/ApiError");
 
 //post new comment
 commentRoutes.post(
-  "/",authorizeUser,
+  "/:postId",authorizeUser,
   validationMiddleware(schemas.commentSchema), 
   async (req, res, next) => {
     try {
       const user = req.user;
       console.log("comment post user", user);
       const newComment = new CommentModel(req.body);
-      newComment.userId = user.id;
+      newComment.userId = user._id;
       const { _id } = await newComment.save();
       res.status(200).send({ _id });
     } catch (error) {

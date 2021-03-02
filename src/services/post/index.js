@@ -1,4 +1,6 @@
 const router = require("express").Router();
+const commentRoutes = require("../comments");
+
 //schemas
 const schemas = require("../../Lib/validation/validationSchema");
 const postModel = require("../../Models/Post");
@@ -12,51 +14,41 @@ const authorizeUser = require("../../Middlewares/auth");
 //error
 const ApiError = require("../../Lib/ApiError");
 
+router.use("/comments", commentRoutes);
+
 router.get("/", authorizeUser, async (req, res, next) => {
   //gets all posts
   try {
-    if (req.user.username) {
-      //checks if the middleware returned a user
-      const query = q2m(req.query);
-      const me = await userModel.findById(req.user._id);
-      const following = me.following;
-      const posts = await postModel
-        .find()
-        .sort({ createdAt: -1 })
-        .skip(query.option.skip)
-        .limit(query.option.limit);
-      posts.filter(post => following(following => post.author === following));
+    if (req.user) {
+      const user = await User.findById(req.user._id);
+      const posts = await Post.find();
+      const followingPosts = posts.filter(post =>
+        user.following.some(following => following === post.authorId)
+      );
       if (posts.length > 0) {
-        res.status(200).send(posts);
-      } else res.send(204); //no content}
-    } else throw new ApiError(401, "You are unauthorized.");
-  } catch (e) {
-    next(e);
+        res.status(200).send(followingPosts);
+      } else res.status(204).json({ message: "no content" });
+    } 
+    else throw new ApiError(401, "You are unauthorized.");
+  } catch (error) {
+    console.log(error);
+    next(error);
   }
 });
 
 router.get("/me", authorizeUser, async (req, res, next) => {
   //gets all posts
   try {
-	console.log("req.user", req.user)
+    console.log("req.user", req.user);
     if (req.user) {
-      //checks if the middleware returned a user
-      console.log(req.user);
-      const query = q2m(req.query);
-      const me = await userModel.findById(req.user._id);
-      const following = me.following;
-      const posts = await postModel
-        .find()
-        .sort({ createdAt: -1 })
-        .skip(query.option.skip)
-        .limit(query.option.limit)
-        .filter(post => post.authorId === req.user._id); //not sure about this line
+      const posts = await postModel.find({ authorId: req.user._id });
       if (posts.length > 0) {
         res.status(200).send(posts);
-      } else res.send(204); //no content}
+      } else res.status(204).json({ message: "no content" }); //no content}
     } else throw new ApiError(401, "You are unauthorized.");
-  } catch (e) {
-    next(e);
+  } catch (error) {
+    console.log(error);
+    next(error);
   }
 });
 
@@ -87,11 +79,15 @@ router.post(
   async (req, res, next) => {
     try {
       const user = req.user;
-	  console.log("user", user)
+      console.log("user", user);
       if (user) {
         const image = req.file && req.file.path;
-		console.log("image", image)
-        const newPost = await new postModel({ ...req.body, image, authorId: user._id });
+        console.log("image", image);
+        const newPost = await new postModel({
+          ...req.body,
+          image,
+          authorId: user._id,
+        });
         const { _id } = await newPost.save();
         res.status(200).send({ newPost });
       } else throw new ApiError(401, "You are unauthorized.");
