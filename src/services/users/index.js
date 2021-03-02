@@ -33,7 +33,7 @@ UserRouter.post(
 UserRouter.post(
   "/upload",
   authorizeUser,
-  cloudinaryParser.single("profileImage"),
+  cloudinaryParser.single("photo"),
   async (req, res, next) => {
     const { id } = req.user;
     try {
@@ -53,8 +53,9 @@ UserRouter.post(
 
 UserRouter.get("/me", authorizeUser, async (req, res, next) => {
   try {
-    const { id } = req.user;
-    const currentUser = await UserModel.findById(id);
+    const { _id } = req.user;
+    console.log("req.user", req.user)
+    const currentUser = await UserModel.findById(_id);
     console.log(currentUser);
     if (!currentUser) throw error;
     res.status(200).send({ currentUser });
@@ -82,8 +83,8 @@ UserRouter.put(
   authorizeUser,
   validationMiddleware(schemas.userSchema),
   async (req, res, next) => {
-    const { id } = req.user;
-    const editedUser = await UserModel.findById(id);
+    const { _id } = req.user;
+    const editedUser = await UserModel.findById(_id);
     try {
       if (editedUser != user)
         throw new ApiError(403, `Only the owner of this profile can edit`);
@@ -101,8 +102,8 @@ UserRouter.put(
 
 UserRouter.delete("/me", authorizeUser, async (req, res, next) => {
   try {
-    const { id } = req.user;
-    const deletedUser = await UserModel.findByIdAndDelete(id);
+    const { _id } = req.user;
+    const deletedUser = await UserModel.findByIdAndDelete(_id);
     if (deletedUser) res.status(200).send(` deleted ${deletedUser} account`);
     const err = new Error("User not found");
     err.httpStatusCode = 404;
@@ -117,7 +118,7 @@ UserRouter.delete("/me", authorizeUser, async (req, res, next) => {
 UserRouter.post("/follow/:followId", authorizeUser, async (req, res, next) => {
   try {
     const { followId } = req.params;
-    const userId = req.user.id;
+    const userId = req.user._id;
     if (!(await User.findById(followId)))
       return next(
         new Error("The user you are trying to follow, does not exist")
@@ -149,7 +150,7 @@ UserRouter.post("/follow/:followId", authorizeUser, async (req, res, next) => {
 UserRouter.put("/unfollow/:followId", authorizeUser, async (req, res, next) => {
   try {
     const { followId } = req.params;
-    const userId = req.user.id;
+    const userId = req.user._id;
 
     const following = await UserModel.findByIdAndUpdate(
       userId,
