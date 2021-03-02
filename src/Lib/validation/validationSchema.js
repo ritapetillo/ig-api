@@ -17,17 +17,15 @@ const schemas = {
     text: Joi.string().required(1000),
     userId: Joi.string(),
     postId: Joi.string(),
-    createdAt: Joi.date(),
-    updatedAt: Joi.date(),
+    
   }),
 	PostSchema: Joi.object().keys({
 		_id: Joi.string(),
-		caption: Joi.string().max(2200).required(),
+		caption: Joi.string().max(2200),
 		image: Joi.string(),
 		comments: Joi.array(), 
 		authorId: Joi.string(), 
-		createdAt: Joi.date(),
-		updatedAt: Joi.date(),
+	
 	})
 }
 

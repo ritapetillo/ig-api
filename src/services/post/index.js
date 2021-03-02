@@ -3,8 +3,7 @@ const express = require("express");
 const postRoutes = express.Router();
 const commentRoutes = require("../comments");
 
-//schemas
-const schemas = require("../../Lib/validation/validationSchema");
+//Models
 const PostModel = require("../../Models/Post");
 const UserModel = require("../../Models/User");
 
@@ -13,7 +12,8 @@ const q2m = require("query-to-mongo");
 
 //middlewares
 const upload = require("../../Lib/cloudinary/posts");
-const validate = require("../../Lib/validation/validationMiddleware");
+const schemas = require("../../Lib/validation/validationSchema");
+const validationMiddleware = require("../../Lib/validation/validationMiddleware");
 const authorizeUser = require("../../Middlewares/auth");
 
 //error
@@ -95,7 +95,7 @@ postRoutes.get("/user/:username", async (req, res, next) => {
 
 postRoutes.post(
   "/upload",
-  authorizeUser,
+  authorizeUser, validationMiddleware(schemas.PostSchema),
   upload.single("photo"),
   async (req, res, next) => {
     try {
@@ -119,7 +119,7 @@ postRoutes.post(
   }
 );
 
-postRoutes.put("/:postId", authorizeUser, async (req, res, next) => {
+postRoutes.put("/:postId", authorizeUser, validationMiddleware(schemas.PostSchema), async (req, res, next) => {
   //edit post
   try {
     if (req.user.username) {
