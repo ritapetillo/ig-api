@@ -2,6 +2,7 @@ const express = require("express");
 const UserRouter = express.Router();
 const mongoose = require("mongoose");
 const cloudinaryParser = require("../../Lib/cloudinary/users");
+const authorizeUser = require("../../Middlewares/auth");
 //model
 const UserModel = require("../../Models/User");
 
@@ -47,6 +48,21 @@ UserRouter.post("/login", async (req, res, next) => {
   } catch (error) {
     console.log(error);
     next(error);
+  }
+});
+
+UserRouter.get("/me", authorizeUser, async (req, res, next) => {
+  try {
+    const user = req.user;
+    const { username, _id } = user;
+    const currentUser = await UserModel.findById(_id);
+    console.log(currentUser);
+    if (!currentUser) throw error;
+    res.status(200).send({ currentUser });
+  } catch (error) {
+    const err = new Error("Wrong Credentials. Please login again");
+    err.code = 401;
+    next(err);
   }
 });
 

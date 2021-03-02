@@ -1,7 +1,7 @@
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const User = require("../../../../Models/User");
-const { GOOGLE_CLIENT_ID, GOOGLE_SECRET_ID, BE_URI,FE_URI } = process.env;
+const { GOOGLE_CLIENT_ID, GOOGLE_SECRET_ID, BE_URI, FE_URI } = process.env;
 const { generateTokens } = require("../../tokens");
 
 passport.use(
@@ -25,7 +25,7 @@ passport.use(
             lastname: family_name,
             imageUrl: picture,
             email,
-            facebookId: profile.id,
+            googleId: profile.id,
             username: email,
           });
           const savedUser = await newUser.save();

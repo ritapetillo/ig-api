@@ -26,14 +26,14 @@ const decodeJWT = (token, secret) =>
 
 const generateTokens = async (user) => {
   try {
-    const { username } = user;
+    const { username, _id } = user;
     const accessToken = await encodeJWT(
-      { username },
+      { username, _id },
       ACCESS_TOKEN_SECRET,
       EXPIRATION_ACCESS_TOKEN
     );
     const refreshToken = await encodeJWT(
-      { username },
+      { username, _id },
       REFRESH_TOKEN_SECRET,
       EXPIRATION_REFRESH_TOKEN
     );
@@ -48,7 +48,10 @@ const generateTokens = async (user) => {
 
 const verifyAccessToken = async (token) => {
   try {
+    console.log(token);
     const user = await decodeJWT(token, ACCESS_TOKEN_SECRET);
+    console.log(user);
+
     if (!user) return null;
     else return user;
     return user;
@@ -63,7 +66,7 @@ const verifyRefreshToken = async (req) => {
     const { refreshToken } = req.cookies;
     const user = await decodeJWT(refreshToken, REFRESH_TOKEN_SECRET);
     if (!user) return null;
-    const { username } = user;
+    const { username, _id } = user;
     const savedRefreshToken = await User.findOne({
       username,
       refreshToken: token,
