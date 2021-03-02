@@ -48,9 +48,7 @@ const generateTokens = async (user) => {
 
 const verifyAccessToken = async (token) => {
   try {
-    console.log(token);
     const user = await decodeJWT(token, ACCESS_TOKEN_SECRET);
-    console.log(user);
 
     if (!user) return null;
     else return user;

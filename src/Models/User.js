@@ -4,9 +4,9 @@ const bcrypt = require("bcryptjs");
 
 const UserSchema = new mongoose.Schema(
   {
-    name: String,
-    lastname: String,
-    username: String,
+    name: { type: String, required: true },
+    lastname: { type: String, required: true },
+    username: { type: String, required: true },
     imageUrl: String,
 
     email: {
@@ -22,18 +22,17 @@ const UserSchema = new mongoose.Schema(
     facebookId: {
       type: String,
     },
-    followers: [],
-    following: [],
-    likedComments:[{type: mongoose.Schema.Types.ObjectId, ref: "comments"}],
-
+    followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "users" }],
+    following: [{ type: mongoose.Schema.Types.ObjectId, ref: "users" }],
+    likedComments: [{ type: mongoose.Schema.Types.ObjectId, ref: "comments" }],
 
     refreshToken: String,
+    socketId: { trype: String },
   },
   {
     toJSON: {
       virtuals: true,
       transform: function (doc, ret) {
-        delete ret._id;
         delete ret.id;
         delete ret.password;
         delete ret.createdAt;
