@@ -2,6 +2,9 @@ const router = require("express").Router()
 //schemas
 const schemas = require("../../Lib/validation/validationSchema")
 const postModel = require("../../Models/Post")
+const userModel = require("../../Models/User")
+//query to mongo 
+const q2m = require("query-to-mongo")
 //middlewares
 const upload = require("../../Lib/cloudinary/posts")
 const validate = require("../../Lib/validation/validationMiddleware")
@@ -13,7 +16,14 @@ router.get("/", authorizeUser, async (req, res, next) => {
 	//gets all posts
 	try {
 		if (req.user.username) { //checks if the middleware returned a user
-			const posts = await postModel.find().sort({ createdAt: -1 }) //how to add pagination to posts?
+			const query = q2m(req.query)
+			const me = await userModel.findById(req.user._id)
+			const following = me.following
+			const posts = await postModel.find()
+				.sort({ createdAt: -1 })
+				.skip(query.option.skip)
+				.limit(query.option.limit)
+			posts.filter(post=> following(following=> post.author === following))
 			if (posts.length > 0) {
 				res.status(200).send(posts)
 			} else res.send(204) //no content}
