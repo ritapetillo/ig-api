@@ -157,7 +157,7 @@ UserRouter.delete("/:ProfileId", async (req, res, next) => {
 
 UserRouter.get(
   "/:username/followers",
-  authorizeUser,
+  //   authorizeUser,
   async (req, res, next) => {
     try {
       if (req.user) {
@@ -187,36 +187,36 @@ UserRouter.get(
   }
 );
 
-// UserRouter.get(
-//   "/:username/following",
-//   authorizeUser,
-//   async (req, res, next) => {
-//     try {
-//       if (req.user) {
-//         const user = await (
-//           await UserModel.findOne({ username: req.params.username })
-//         ).populated("following");
-//         if (user.private) {
-//           if (req.user.following.includes(user._id)) {
-//             res.send(user.following);
-//           } else {
-//             const error = new Error();
-//             error.httpStatusCode = 401;
-//             next(error);
-//           }
-//         } else {
-//           res.send(user.following);
-//         }
-//       } else {
-//         const err = new Error();
-//         error.httpStatusCdoe = 401;
-//         next(error);
-//       }
-//     } catch (error) {
-//       console.log(error);
-//       next(error);
-//     }
-//   }
-// );
+UserRouter.get(
+  "/:username/following",
+  //   authorizeUser,
+  async (req, res, next) => {
+    try {
+      if (req.user) {
+        const user = await (
+          await UserModel.findOne({ username: req.params.username })
+        ).populated("following");
+        if (user.private) {
+          if (req.user.following.includes(user._id)) {
+            res.send(user.following);
+          } else {
+            const error = new Error();
+            error.httpStatusCode = 401;
+            next(error);
+          }
+        } else {
+          res.send(user.following);
+        }
+      } else {
+        const err = new Error();
+        error.httpStatusCdoe = 401;
+        next(error);
+      }
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+);
 
 module.exports = UserRouter;
