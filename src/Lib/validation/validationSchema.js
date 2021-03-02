@@ -1,15 +1,13 @@
 const Joi = require("joi")
 const schemas = {
-  // userSchema: Joi.object().keys({
-  //   name: Joi.string().required(),
-  //   lastName: Joi.string().required(),
-  //   username: Joi.string().required(),
-  //   email: Joi.string().email().required(),
-  //   password: Joi.string().min(6).required(),
-  //   bio: Joi.string(),
-  //   title: Joi.string().required(),
-  //   area: Joi.string().required(),
-  // }),
+  userSchema: Joi.object().keys({
+    name: Joi.string(),
+    lastname: Joi.string(),
+    username: Joi.string(),
+    email: Joi.string().email(),
+    password: Joi.string().min(6),
+    bio: Joi.string(),
+  }),
   loginSchema: Joi.object().keys({
     username: Joi.string().required(),
     password: Joi.string().min(6).required(),
@@ -19,17 +17,15 @@ const schemas = {
     text: Joi.string().required(1000),
     userId: Joi.string(),
     postId: Joi.string(),
-    createdAt: Joi.date(),
-    updatedAt: Joi.date(),
+    
   }),
 	PostSchema: Joi.object().keys({
 		_id: Joi.string(),
-		caption: Joi.string().max(2200).required(),
+		caption: Joi.string().max(2200),
 		image: Joi.string(),
 		comments: Joi.array(), 
 		authorId: Joi.string(), 
-		createdAt: Joi.date(),
-		updatedAt: Joi.date(),
+	
 	})
 }
 

@@ -6,6 +6,7 @@ const q2m = require("query-to-mongo");
 
 //Model
 const CommentModel = require("../../Models/Comment");
+const PostModel = require("../../Models/Post");
 const UserModel = require("../../Models/User");
 
 //Middlewares
@@ -18,16 +19,24 @@ const ApiError = require("../../Lib/ApiError");
 
 //post new comment
 commentRoutes.post(
-  "/",authorizeUser,
-  validationMiddleware(schemas.commentSchema), 
+  "/:postId",
+  authorizeUser,
+  validationMiddleware(schemas.commentSchema),
   async (req, res, next) => {
+    const { postId } = req.params;
+    const userId = req.user._id;
     try {
-      const user = req.user;
-      console.log("comment post user", user);
+      if (!(await PostModel.findById(postId)))
+        throw new ApiError(404, `post not found`);
       const newComment = new CommentModel(req.body);
-      newComment.userId = user.id;
+      newComment.userId = userId;
       const { _id } = await newComment.save();
-      res.status(200).send({ id: _id });
+      const comment = await PostModel.findByIdAndUpdate(
+        postId,
+        { $addToSet: { comments: _id } },
+        { runValidators: true, new: true }
+      );
+      res.status(200).send({ _id });
     } catch (error) {
       console.log(error);
       next(error);
@@ -38,16 +47,16 @@ commentRoutes.post(
 //retrieve all comments for a specific post
 commentRoutes.get("/:postId", async (req, res, next) => {
   try {
-    const query = q2m(req.query);
-    const total = await CommentModel.countDocuments(query.criteria);
-    const comment = await CommentModel.find(
-      query.criteria && { postId: req.params.postId },
-      query.options.fields
-    )
-      .sort(query.options.sort)
-      .skip(query.options.skip)
-      .limit(query.options.limit);
-    res.status(200).send({ links: query.links("/comments", total), comment });
+    const { postId } = req.params;
+    if (postId) {
+      const post = await PostModel.findOne({ _id: postId }).populate({
+        path: "comments",
+      });
+      console.log("XX Post", post);
+      if (post) {
+        res.status(200).send(post);
+      } else res.status(200).json({ message: "no comments for this post" });
+    } else throw new ApiError(404, "no post found");
   } catch (error) {
     console.log(error);
     next(error);
@@ -56,15 +65,16 @@ commentRoutes.get("/:postId", async (req, res, next) => {
 
 //owner to edit their own comment on a specific post
 commentRoutes.put(
-  "/:commentId", authorizeUser,
+  "/:commentId",
+  authorizeUser,
   validationMiddleware(schemas.commentSchema),
   async (req, res, next) => {
     const { commentId } = req.params;
     const user = req.user;
     const commentToEdit = await CommentModel.findById(commentId);
     try {
-      if (commentToEdit.userId != user.id)
-        throw new ApiError(403, `Only the owner of this comment can edit`);
+      if (commentToEdit.userId != user._id)
+        throw new ApiError(401, `Only the owner of this comment can edit`);
       const updatedComment = await CommentModel.findByIdAndUpdate(
         commentId,
         req.body,
@@ -73,7 +83,7 @@ commentRoutes.put(
           new: true,
         }
       );
-      res.status(200).json({ data: updatedComment });
+      res.status(200).json({ updatedComment });
     } catch (error) {
       console.log(error);
       next(error);
@@ -82,59 +92,66 @@ commentRoutes.put(
 );
 
 //owner to delete their own comment on a specific post
-commentRoutes.delete("/:commentId", authorizeUser, async (req, res, next) => {
-  const { commentId } = req.params;
-  const user = req.user;
-
-  try {
-    const commentToDelete = await CommentModel.findById(commentId);
-    if (commentToDelete.userId == user.id) {
-      try {
-        const comment = await CommentModel.findByIdAndDelete(comment);
-        if (comment) {
-          res.send(commentId);
-        } else {
+commentRoutes.delete(
+  "/:postId/:commentId",
+  authorizeUser,
+  async (req, res, next) => {
+    try {
+      if (req.user.username) {
+        const { commentId, postId } = req.params;
+        console.log("commentId XXX", commentId)
+        if (!(await CommentModel.findById(commentId)))
           throw new ApiError(404, `Comment not found`);
-        }
-      } catch {
-        throw new ApiError(400, `Something went wrong`);
+        const post = await PostModel.findByIdAndUpdate(
+          postId,
+          { $pull: { comments: commentId } },
+          { runValidators: true, new: true }
+        );
+        const deletedComment = await CommentModel.findByIdAndDelete(commentId);
+        res.status(200).send("Deleted");
       }
-    } else {
-      throw new ApiError(403, `Only the owner of this comment can delete`);
+      throw new ApiError(401, `Only the owner of this comment can delete`);
+    } catch (error) {
+        console.log(error)
+      next(error);
     }
-  } catch (error) {
-    console.log(error);
-    next(error);
   }
-});
+);
 
-//Like a comment
-commentRoutes.post("/:commentId/like", async (req, res, next) => {
-  try {
-    const { commentId } = req.params;
-    const userId = req.user.id;
-    if (!(await CommentModel.findById(commentId)))
-      throw new ApiError(404, `Comment not found`);
-    const user = await UserModel.findByIdAndUpdate(
-      userId,
-      { $addToSet: { likedComments: commentId } },
-      { runValidators: true, new: true }
-    );
-    const likedComment = await CommentModel.findByIdAndUpdate(commentId, {
-      $addToSet: { likes: userId },
-    });
-    res.status(200).send({ user });
-  } catch (error) {
-    console.log(error);
-    next(error);
-  }
-});
-
-//Unlike a comment
-commentRoutes.put("/:commentId/unlike", async (req, res, next) => {
+//Like a post
+commentRoutes.post(
+  "/:commentId/like",
+  authorizeUser,
+  async (req, res, next) => {
     try {
       const { commentId } = req.params;
-      const userId = req.user.id;
+      const userId = req.user._id;
+      if (!(await CommentModel.findById(commentId)))
+        throw new ApiError(404, `Comment not found`);
+      const user = await UserModel.findByIdAndUpdate(
+        userId,
+        { $addToSet: { likedComments: commentId } },
+        { runValidators: true, new: true }
+      );
+      const likedPost = await CommentModel.findByIdAndUpdate(commentId, {
+        $addToSet: { likes: req.user.username },
+      });
+      res.status(200).send({ commentId });
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+);
+
+//Unlike a comment
+commentRoutes.put(
+  "/:commentId/unlike",
+  authorizeUser,
+  async (req, res, next) => {
+    try {
+      const { commentId } = req.params;
+      const userId = req.user._id;
       if (!(await CommentModel.findById(commentId)))
         throw new ApiError(404, `Comment not found`);
       const user = await UserModel.findByIdAndUpdate(
@@ -142,14 +159,15 @@ commentRoutes.put("/:commentId/unlike", async (req, res, next) => {
         { $pull: { likedComments: commentId } },
         { runValidators: true, new: true }
       );
-      const likedComment = await CommentModel.findByIdAndUpdate(commentId, {
-        $pull: { likes: userId },
+      const unlikedComment = await CommentModel.findByIdAndUpdate(commentId, {
+        $pull: { likes: req.user.username },
       });
-      res.status(200).send({ user });
+      res.status(200).send({ commentId });
     } catch (error) {
       console.log(error);
       next(error);
     }
-  });
+  }
+);
 
 module.exports = commentRoutes;

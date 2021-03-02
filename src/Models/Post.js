@@ -14,11 +14,11 @@ const PostSchema = new mongoose.Schema({
         type: [{ type: mongoose.Schema.Types.ObjectId, ref: "comments" }]
     },
     authorId: {
-        type: mongoose.Schema.Types.ObjectId, ref: "user", 
+        type: mongoose.Schema.Types.ObjectId, ref: "users", 
         required: true
-    }
-},
+    },
+    likes: [{type: String}]},
 {timestamps: true}
 );
-const PostModel = mongoose.model("post", PostSchema);
+const PostModel = mongoose.model("posts", PostSchema);
 module.exports = PostModel;

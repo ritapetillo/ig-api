@@ -8,10 +8,13 @@ const UserSchema = new mongoose.Schema(
     lastname: { type: String, required: true },
     username: { type: String, required: true },
     imageUrl: String,
-
+  
     email: {
       type: String,
       required: true,
+    },
+    bio: {
+      type: String
     },
     password: {
       type: String,
@@ -22,9 +25,14 @@ const UserSchema = new mongoose.Schema(
     facebookId: {
       type: String,
     },
-    followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "users" }],
-    following: [{ type: mongoose.Schema.Types.ObjectId, ref: "users" }],
-    likedComments: [{ type: mongoose.Schema.Types.ObjectId, ref: "comments" }],
+    publicProfile:{
+      type: Boolean,
+      default: true
+    },
+    followers: [{type: mongoose.Schema.Types.ObjectId, ref: "users"}],
+    following: [{type: mongoose.Schema.Types.ObjectId, ref: "users"}],
+    likedComments:[{type: mongoose.Schema.Types.ObjectId, ref: "comments"}],
+    likedPosts:[{type: mongoose.Schema.Types.ObjectId, ref: "posts"}],
 
     refreshToken: String,
     socketId: { trype: String },
