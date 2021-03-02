@@ -108,11 +108,11 @@ commentRoutes.delete("/:commentId", authorizeUser, async (req, res, next) => {
   }
 });
 
-//Like a comment
-commentRoutes.post("/:commentId/like", async (req, res, next) => {
+//Like a post
+commentRoutes.post("/:commentId/like", authorizeUser, async (req, res, next) => {
   try {
     const { commentId } = req.params;
-    const userId = req.user.id;
+    const userId = req.user._id;
     if (!(await CommentModel.findById(commentId)))
       throw new ApiError(404, `Comment not found`);
     const user = await UserModel.findByIdAndUpdate(
@@ -120,10 +120,10 @@ commentRoutes.post("/:commentId/like", async (req, res, next) => {
       { $addToSet: { likedComments: commentId } },
       { runValidators: true, new: true }
     );
-    const likedComment = await CommentModel.findByIdAndUpdate(commentId, {
-      $addToSet: { likes: userId },
+    const likedPost = await CommentModel.findByIdAndUpdate(commentId, {
+      $addToSet: { likes: req.user.username },
     });
-    res.status(200).send({ user });
+    res.status(200).send({ likedPost });
   } catch (error) {
     console.log(error);
     next(error);
@@ -131,10 +131,10 @@ commentRoutes.post("/:commentId/like", async (req, res, next) => {
 });
 
 //Unlike a comment
-commentRoutes.put("/:commentId/unlike", async (req, res, next) => {
+commentRoutes.put("/:commentId/unlike",  authorizeUser, async (req, res, next) => {
     try {
       const { commentId } = req.params;
-      const userId = req.user.id;
+      const userId = req.user._id;
       if (!(await CommentModel.findById(commentId)))
         throw new ApiError(404, `Comment not found`);
       const user = await UserModel.findByIdAndUpdate(
@@ -142,10 +142,10 @@ commentRoutes.put("/:commentId/unlike", async (req, res, next) => {
         { $pull: { likedComments: commentId } },
         { runValidators: true, new: true }
       );
-      const likedComment = await CommentModel.findByIdAndUpdate(commentId, {
-        $pull: { likes: userId },
+      const unlikedComment = await CommentModel.findByIdAndUpdate(commentId, {
+        $pull: { likes: req.user.username },
       });
-      res.status(200).send({ user });
+      res.status(200).send({ unlikedComment });
     } catch (error) {
       console.log(error);
       next(error);

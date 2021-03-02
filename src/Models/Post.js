@@ -16,9 +16,9 @@ const PostSchema = new mongoose.Schema({
     authorId: {
         type: mongoose.Schema.Types.ObjectId, ref: "users", 
         required: true
-    }
-},
+    },
+    likes: [{type: String}]},
 {timestamps: true}
 );
-const PostModel = mongoose.model("post", PostSchema);
+const PostModel = mongoose.model("posts", PostSchema);
 module.exports = PostModel;
