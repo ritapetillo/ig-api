@@ -33,6 +33,27 @@ router.get("/", authorizeUser, async (req, res, next) => {
 	}
 })
 
+router.get("/me", authorizeUser, async (req, res, next) => {
+	//gets all posts
+	try {
+		if (req.user.username) { //checks if the middleware returned a user
+			const query = q2m(req.query)
+			const me = await userModel.findById(req.user._id)
+			const following = me.following
+			const posts = await postModel.find()
+				.sort({ createdAt: -1 })
+				.skip(query.option.skip)
+				.limit(query.option.limit)
+				.filter(post=> post.authorId === req.user._id) //not sure about this line 
+			if (posts.length > 0) {
+				res.status(200).send(posts)
+			} else res.send(204) //no content}
+		} else throw new ApiError(401, "You are unauthorized.")
+	} catch (e) {
+		next(e)
+	}
+})
+
 router.get("/:userId", async (req, res, next) => {
 	//didn't make this endpoint reserved because you don't need to be logged in to see public profiles
 	//gets posts from single user (user feed)
