@@ -38,7 +38,7 @@ const disconnectUser = async (user) => {
 
 const findChatsByPartecipants = async (id) => {
   try {
-    const chats = await ChatRoom.find({ participants: { $in: [id] } });
+    const chats = await ChatRoom.find({ users: { $in: [id] } });
     return chats;
   } catch (err) {
     return null;

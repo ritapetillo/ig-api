@@ -28,6 +28,8 @@ const createSocketServer = (server) => {
       userRooms.map((room) => {
         socket.join(room._id);
       });
+
+      console.log(io.sockets.adapter.sids[socket.id]);
     });
 
     // socket.on("leaveRoom", async () => {
@@ -63,7 +65,6 @@ const createSocketServer = (server) => {
       rooms.map((room) => {
         socket.leave(room);
       });
-
       //remove socketId
       const disconect = await disconnectUser();
     });
