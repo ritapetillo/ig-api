@@ -7,11 +7,13 @@ const generateCookies = async (tokens, res) => {
       httpOnly: true,
       secure: true, //set to true when deploy
       maxAge: EXPIRATION_ACCESS_COOKIE,
+      sameSite: "strict", // THIS is the config you are looing for.
     });
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: true, //set to true when deploy
       maxAge: EXPIRATION_REFRESH_COOKIE,
+      sameSite: "strict", // THIS is the config you are looing for.
     });
   } catch (err) {
     return err;
