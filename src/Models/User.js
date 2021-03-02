@@ -22,9 +22,14 @@ const UserSchema = new mongoose.Schema(
     facebookId: {
       type: String,
     },
-    followers: [],
-    following: [],
+    publicProfile:{
+      type: Boolean,
+      default: true
+    },
+    followers: [{type: mongoose.Schema.Types.ObjectId, ref: "users"}],
+    following: [{type: mongoose.Schema.Types.ObjectId, ref: "users"}],
     likedComments:[{type: mongoose.Schema.Types.ObjectId, ref: "comments"}],
+
 
 
     refreshToken: String,

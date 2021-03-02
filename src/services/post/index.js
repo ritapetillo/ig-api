@@ -36,7 +36,8 @@ router.get("/", authorizeUser, async (req, res, next) => {
 router.get("/me", authorizeUser, async (req, res, next) => {
 	//gets all posts
 	try {
-		if (req.user.username) { //checks if the middleware returned a user
+		if (req.user) { //checks if the middleware returned a user
+			console.log(req.user)
 			const query = q2m(req.query)
 			const me = await userModel.findById(req.user._id)
 			const following = me.following
@@ -88,7 +89,7 @@ router.post(
 					image: req.file.path,
 				})
 				const { _id } = await new_post.save()
-				res.status(200).send(`Resource created with id ${_id}`)
+				res.status(200).send(new_post)
 			}
 			 else throw new ApiError(401, "You are unauthorized.")
 		} catch (e) {
@@ -107,7 +108,7 @@ router.put("/:postId", authorizeUser, async (req, res, next) => {
 				{ runValidators: true }
 			)
 			if (edited_post) {
-				res.status(200).send("Updated succesfully!")
+				res.status(200).send(edited_post)
 			}
 		} else throw new ApiError(401, "You are unauthorized.")
 	} catch (e) {

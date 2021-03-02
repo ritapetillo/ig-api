@@ -14,6 +14,8 @@ passport.use(
     },
     async function (accessToken, refreshToken, profile, done) {
       try {
+        console.log("GOOGLE_CLIENT_ID", GOOGLE_CLIENT_ID)
+
         console.log(profile);
         const { email, given_name, family_name, picture } = profile._json;
         //verify if the user is already registered

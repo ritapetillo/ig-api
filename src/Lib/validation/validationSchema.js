@@ -1,15 +1,15 @@
 const Joi = require("joi")
 const schemas = {
-  // userSchema: Joi.object().keys({
-  //   name: Joi.string().required(),
-  //   lastName: Joi.string().required(),
-  //   username: Joi.string().required(),
-  //   email: Joi.string().email().required(),
-  //   password: Joi.string().min(6).required(),
-  //   bio: Joi.string(),
-  //   title: Joi.string().required(),
-  //   area: Joi.string().required(),
-  // }),
+  userSchema: Joi.object().keys({
+    name: Joi.string().required(),
+    lastName: Joi.string().required(),
+    username: Joi.string().required(),
+    email: Joi.string().email().required(),
+    password: Joi.string().min(6).required(),
+    bio: Joi.string(),
+    title: Joi.string().required(),
+    area: Joi.string().required(),
+  }),
   loginSchema: Joi.object().keys({
     username: Joi.string().required(),
     password: Joi.string().min(6).required(),

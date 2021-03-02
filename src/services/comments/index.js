@@ -27,7 +27,7 @@ commentRoutes.post(
       const newComment = new CommentModel(req.body);
       newComment.userId = user.id;
       const { _id } = await newComment.save();
-      res.status(200).send({ id: _id });
+      res.status(200).send({ _id });
     } catch (error) {
       console.log(error);
       next(error);
@@ -73,7 +73,7 @@ commentRoutes.put(
           new: true,
         }
       );
-      res.status(200).json({ data: updatedComment });
+      res.status(200).json({ updatedComment });
     } catch (error) {
       console.log(error);
       next(error);
