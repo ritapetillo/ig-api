@@ -2,8 +2,16 @@ const express = require("express");
 const UserRouter = express.Router();
 const mongoose = require("mongoose");
 const cloudinaryParser = require("../../Lib/cloudinary/users");
+const q2m = require("query-to-mongo");
+
 //model
 const UserModel = require("../../Models/User");
+
+//auth
+const { generateTokens, refresh } = require("../../Lib/auth/tokens");
+
+//middlewares
+const { authorizeUser } = require("../../Middlewares/auth");
 
 UserRouter.post(
   "/register",
@@ -25,25 +33,47 @@ UserRouter.post("/login", async (req, res, next) => {
   try {
     //CHECK CREDENTIALS
     const { email, password } = req.body;
+    console.log(email, password);
     const user = await UserModel.findByCredentials(email, password);
-
-    if (!author) {
+    console.log(user);
+    if (!user) {
       res.status(404).send("No user found");
     } else {
       //GENERATE TOKEN
-      const tokens = await authenticate(user);
-      res.cookie("accessToken", tokens.access, {
-        httpOnly: true,
-        path: "/authors/refreshToken",
-      });
-      res.cookie("refreshToken", tokens.refresh, {
-        httpOnly: true,
-        path: "/authors/refreshToken",
-      });
+      const { accessToken, refreshToken } = await generateTokens(user);
+
+      //send back tokens
+      res.send({ accessToken, refreshToken });
+
+      //*send cookies
+      //   res.cookie("accessToken", tokens.access, {
+      //     httpOnly: true,
+      //     path: "/authors/refreshToken",
+      //   });
+      //   res.cookie("refreshToken", tokens.refresh, {
+      //     httpOnly: true,
+      //     path: "/authors/refreshToken",
+      //   });
 
       //SEND BACK TOKEN
-      await res.status(200).send({ tokens, message: "nice!" });
+      res.status(200).send({ accessToken, refreshToken });
     }
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+});
+
+UserRouter.post("/refreshToken", async (req, res, next) => {
+  try {
+    //todo: Grab refresh token
+    const oldRefreshToken = req.body.refreshToken;
+    //todo: verify the token
+
+    //todo: IF it's ok generate new access token and new refresh token
+    const { accessToken, refreshToken } = await refresh(oldRefreshToken);
+    //todo: SEND them back
+    res.send({ accessToken, refreshToken });
   } catch (error) {
     console.log(error);
     next(error);
@@ -125,27 +155,68 @@ UserRouter.delete("/:ProfileId", async (req, res, next) => {
   }
 });
 
-// UserRouter.post("/:ProfileId/followers", async (req, res, next) => {
-//   try {
-//     //TODO: Add profile in the array of followers
-//     //TODO: We need the person to follow
-//     // const user = await UserModel.findOneAndUpdate(
-//     //     {username: req.user.username}
-//     // )
-//     //TODO: We need to take that person who is following
-//     const newFollower = await UserModel.findById(ProfileId);
-//   } catch (error) {
-//     console.log(error);
-//     next(error);
-//   }
-// });
+UserRouter.get(
+  "/:username/followers",
+  authorizeUser,
+  async (req, res, next) => {
+    try {
+      if (req.user) {
+        const user = await (
+          await UserModel.findOne({ username: req.params.username })
+        ).populate("followers");
+        if (user.private) {
+          if (req.user.following.includes(user._id)) {
+            res.send(user.followers);
+          } else {
+            const error = new Error();
+            error.httpStatusCode = 401;
+            next(error);
+          }
+        } else {
+          res.send(user.followers);
+        }
+      } else {
+        const err = new Error();
+        err.httpStatusCode = 401;
+        next(err);
+      }
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+);
 
-// UserRouter.get("/followers", async (req,res,next) =>{
+// UserRouter.get(
+//   "/:username/following",
+//   authorizeUser,
+//   async (req, res, next) => {
 //     try {
-//         const followers = await UserModel.find(req.query)
+//       if (req.user) {
+//         const user = await (
+//           await UserModel.findOne({ username: req.params.username })
+//         ).populated("following");
+//         if (user.private) {
+//           if (req.user.following.includes(user._id)) {
+//             res.send(user.following);
+//           } else {
+//             const error = new Error();
+//             error.httpStatusCode = 401;
+//             next(error);
+//           }
+//         } else {
+//           res.send(user.following);
+//         }
+//       } else {
+//         const err = new Error();
+//         error.httpStatusCdoe = 401;
+//         next(error);
+//       }
 //     } catch (error) {
-
+//       console.log(error);
+//       next(error);
 //     }
-// })
+//   }
+// );
 
 module.exports = UserRouter;

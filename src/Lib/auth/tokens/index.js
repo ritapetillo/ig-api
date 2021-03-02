@@ -24,7 +24,7 @@ const decodeJWT = (token, secret) =>
     });
   });
 
-const generateTokens = async (user) => {
+const generateTokens = async user => {
   try {
     const { username } = user;
     const accessToken = await encodeJWT(
@@ -46,9 +46,9 @@ const generateTokens = async (user) => {
   }
 };
 
-const verifyAccessToken = async (token) => {
+const verifyAccessToken = async token => {
   try {
-    const user = await decodeJWT(toekn, ACCESS_TOKEN_SECRET);
+    const user = await decodeJWT(token, ACCESS_TOKEN_SECRET);
     if (!user) return null;
     else return user;
     return user;
@@ -58,7 +58,7 @@ const verifyAccessToken = async (token) => {
   }
 };
 
-const verifyRefreshToken = async (req) => {
+const verifyRefreshToken = async req => {
   try {
     const { refreshToken } = req.cookies;
     const user = await decodeJWT(refreshToken, REFRESH_TOKEN_SECRET);
@@ -78,5 +78,36 @@ const verifyRefreshToken = async (req) => {
     return error;
   }
 };
+
+//? Do we need it?!! ლ(ಠ_ಠ ლ)
+// const refreshToken = async oldRefreshToken => {
+//   const decoded = await verifyRefreshToken(oldRefreshToken);
+
+//   const user = await User.findOne({ _id: decoded._id });
+
+//   if (!user) {
+//     throw new Error(`Access is forbidden`);
+//   }
+//   const currentRefreshToken = user.refreshTokens.find(
+//     refreshToken => refreshToken === oldRefreshToken
+//   );
+
+//   if (!currentRefreshToken) {
+//     throw new Error(`Refresh token is wrong`);
+//   }
+
+//   const newAccessToken = await generateJWT({ _id: user._id });
+//   const newRefreshToken = await generateRefreshJWT({ _id: user._id });
+
+//   const newRefreshTokens = user.refreshTokens
+//     .filter(refreshToken => refreshToken !== oldRefreshToken)
+//     .concat({ token: newRefreshToken });
+
+//   user.refreshTokens = [...newRefreshTokens];
+
+//   await user.save();
+
+//   return { token: newAccessToken, refreshToken: newRefreshToken };
+// };
 
 module.exports = { generateTokens, verifyAccessToken, verifyRefreshToken };

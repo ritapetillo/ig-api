@@ -4,15 +4,33 @@ const bcrypt = require("bcryptjs");
 
 const UserSchema = new mongoose.Schema(
   {
-    name: String,
-    lastname: String,
-    username: String,
+    name: {
+      type: String,
+      required: true,
+    },
+    surname: {
+      type: String,
+      required: true,
+    },
+    username: {
+      type: String,
+      unique: true,
+      required: true,
+    },
     imageUrl: String,
     bio: String,
     email: {
       type: String,
       required: true,
+      unique: true,
     },
+
+    private: {
+      type: Boolean,
+      default: false,
+      required: true,
+    },
+
     password: {
       type: String,
       required: true,
@@ -23,7 +41,8 @@ const UserSchema = new mongoose.Schema(
     IGId: {
       type: String,
     },
-
+    posts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Posts" }],
+    saved: [{ type: mongoose.Schema.Types.ObjectId, ref: "Posts" }],
     followers: [{ type: String, field: "username", ref: "users" }],
     following: [{ type: String, field: "username", ref: "users" }],
     followingTag: [
@@ -57,6 +76,17 @@ UserSchema.methods.comparePass = async function (pass) {
   } catch (err) {
     console.log(err);
     return false;
+  }
+};
+
+UserSchema.statics.findByCredentials = async function (email, plainPW) {
+  const user = await this.findOne({ email });
+  if (user) {
+    const isMatch = await bcrypt.compare(plainPW, user.password);
+    if (isMatch) return user;
+    else return null;
+  } else {
+    return null;
   }
 };
 
