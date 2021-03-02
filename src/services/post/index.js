@@ -20,16 +20,15 @@ router.get("/", authorizeUser, async (req, res, next) => {
   //gets all posts
   try {
     if (req.user) {
-      const user = await User.findById(req.user._id);
-      const posts = await Post.find();
+      const user = await userModel.findById(req.user._id);
+      const posts = await postModel.find();
       const followingPosts = posts.filter(post =>
         user.following.some(following => following === post.authorId)
       );
-      if (posts.length > 0) {
+      if (followingPosts.length > 0) {
         res.status(200).send(followingPosts);
-      } else res.status(204).json({ message: "no content" });
-    } 
-    else throw new ApiError(401, "You are unauthorized.");
+      } else res.status(200).json({ message: "no content" });
+    } else throw new ApiError(401, "You are unauthorized.");
   } catch (error) {
     console.log(error);
     next(error);
@@ -44,7 +43,7 @@ router.get("/me", authorizeUser, async (req, res, next) => {
       const posts = await postModel.find({ authorId: req.user._id });
       if (posts.length > 0) {
         res.status(200).send(posts);
-      } else res.status(204).json({ message: "no content" }); //no content}
+      } else res.status(200).json({ message: "no content" });
     } else throw new ApiError(401, "You are unauthorized.");
   } catch (error) {
     console.log(error);
@@ -52,23 +51,21 @@ router.get("/me", authorizeUser, async (req, res, next) => {
   }
 });
 
-router.get("/:userId", async (req, res, next) => {
-  //didn't make this endpoint reserved because you don't need to be logged in to see public profiles
-  //gets posts from single user (user feed)
+//gets posts from single user (user feed)
+
+router.get("/:username", async (req, res, next) => {
   try {
-    const check_user = await userModel.findById(req.params.userId);
-    if (check_user) {
-      //if a user is found, search for their feed
-      const user_feed = await postModel
-        .find({ authorId: req.params.userId })
-        .sort({ createdAt: -1 });
-      if (user_feed.length > 0) {
-        //if there are posts
-        res.status(200).send(user_feed);
-      } else res.send(204); //if there are no posts
-    } else throw new ApiError(404, "No user found"); //if there is no user
-  } catch (e) {
-    next(e);
+    const { username } = req.params;
+    if (username) {
+      const user = await userModel.findOne({ username: username });
+      const posts = await postModel.find({ authorId: user._id });
+      if (posts.length > 0) {
+        res.status(200).send(posts);
+      } else res.status(200).json({ message: "no content" });
+    } else throw new ApiError(404, "no user found");
+  } catch (error) {
+    console.log(error);
+    next(error);
   }
 });
 
