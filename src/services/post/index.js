@@ -81,15 +81,15 @@ router.get("/:userId", async (req, res, next) => {
 
 router.post(
   "/upload",
-//   authorizeUser,
+  authorizeUser,
   upload.single("photo"),
   async (req, res, next) => {
     try {
-		console.log("hello")
       const user = req.user;
+	  console.log("user", user)
       if (user) {
         const image = req.file && req.file.path;
-		console.log("req.body", req.body)
+		console.log("image", image)
         const newPost = await new postModel({ ...req.body, image, authorId: user._id });
         const { _id } = await newPost.save();
         res.status(200).send({ newPost });

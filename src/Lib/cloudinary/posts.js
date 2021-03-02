@@ -5,7 +5,7 @@ const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const storage = new CloudinaryStorage({
   cloudinary,
   params: {
-    folder: "posts",
+    folder: "Posts",
   },
 });
 const parser = multer({ storage });
