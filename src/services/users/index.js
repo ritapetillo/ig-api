@@ -146,7 +146,7 @@ UserRouter.post("/follow/:followId", authorizeUser, async (req, res, next) => {
 
 //PUT //api/users/:userId/unfollow/:followId
 //UNFOLLOW AN USER
-UserRouter.put("/unfollow/:followId", auth, async (req, res, next) => {
+UserRouter.put("/unfollow/:followId", authorizeUser, async (req, res, next) => {
   try {
     const { followId } = req.params;
     const userId = req.user.id;
