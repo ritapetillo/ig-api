@@ -29,10 +29,10 @@ postRoutes.get("/", authorizeUser, async (req, res, next) => {
       const user = await UserModel.findById(req.user._id);
       console.log("user", user)
       // const posts = await PostModel.find().populate({path : 'comments', populate: {path: 'userId'}});
-      const posts = await PostModel.find().populate({path: "comments" });
+      const posts = await PostModel.find().populate({path: "comments authorId" });
       const followingPosts = posts.filter(post =>
     
-        user.following.includes(post.authorId));
+        user.following.includes(post.authorId._id));
       console.log("followingPosts",followingPosts )
       if (followingPosts.length > 0) {
         res.status(200).send(followingPosts);
