@@ -24,12 +24,12 @@ commentRoutes.post(
   validationMiddleware(schemas.commentSchema),
   async (req, res, next) => {
     const { postId } = req.params;
-    const userId = req.user._id;
+    const user = req.user.username;
     try {
       if (!(await PostModel.findById(postId)))
         throw new ApiError(404, `post not found`);
       const newComment = new CommentModel(req.body);
-      newComment.userId = userId;
+      newComment.author = user;
       const { _id } = await newComment.save();
       const comment = await PostModel.findByIdAndUpdate(
         postId,
@@ -73,7 +73,7 @@ commentRoutes.put(
     const user = req.user;
     const commentToEdit = await CommentModel.findById(commentId);
     try {
-      if (commentToEdit.userId != user._id)
+      if (commentToEdit.author != user.username)
         throw new ApiError(401, `Only the owner of this comment can edit`);
       const updatedComment = await CommentModel.findByIdAndUpdate(
         commentId,
@@ -96,23 +96,23 @@ commentRoutes.delete(
   "/:postId/:commentId",
   authorizeUser,
   async (req, res, next) => {
+    const { commentId, postId } = req.params;
+    const user = req.user;
+    const commentToEdit = await CommentModel.findById(commentId);
     try {
-      if (req.user.username) {
-        const { commentId, postId } = req.params;
-        console.log("commentId XXX", commentId)
-        if (!(await CommentModel.findById(commentId)))
-          throw new ApiError(404, `Comment not found`);
-        const post = await PostModel.findByIdAndUpdate(
-          postId,
-          { $pull: { comments: commentId } },
-          { runValidators: true, new: true }
-        );
-        const deletedComment = await CommentModel.findByIdAndDelete(commentId);
-        res.status(200).send("Deleted");
-      }
-      throw new ApiError(401, `Only the owner of this comment can delete`);
+      if (commentToEdit.author != user.username)
+        throw new ApiError(401, `Only the owner of this comment can edit`);
+      if (!(await CommentModel.findById(commentId)))
+        throw new ApiError(404, `Comment not found`);
+      const post = await PostModel.findByIdAndUpdate(
+        postId,
+        { $pull: { comments: commentId } },
+        { runValidators: true, new: true }
+      );
+      const deletedComment = await CommentModel.findByIdAndDelete(commentId);
+      res.status(200).send("Deleted");
     } catch (error) {
-        console.log(error)
+      console.log(error);
       next(error);
     }
   }

@@ -40,7 +40,7 @@ const socketServer = createSocketServer(httpServer);
 
 //ERROR HANDLERS
 server.use(error_handler({ log: true, debug: true }));
-// console.log(listEndPoints(server));
+console.log(listEndPoints(server));
 
 //Connect to DB and server
 mongoose
