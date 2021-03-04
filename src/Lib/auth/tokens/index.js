@@ -63,11 +63,12 @@ const verifyRefreshToken = async (req) => {
   try {
     const { refreshToken } = req.cookies;
     const user = await decodeJWT(refreshToken, REFRESH_TOKEN_SECRET);
+    console.log(user)
     if (!user) return null;
     const { username, _id } = user;
     const savedRefreshToken = await User.findOne({
       username,
-      refreshToken: token,
+      refreshToken: refreshToken,
     });
     if (!savedRefreshToken) return null;
     else return user;

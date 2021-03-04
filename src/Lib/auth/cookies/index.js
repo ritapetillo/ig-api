@@ -5,15 +5,15 @@ const generateCookies = async (tokens, res) => {
     const { accessToken, refreshToken } = tokens;
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
-      secure: false, //set to true when deploy
+      // secure: true, //set to true when deploy
       maxAge: EXPIRATION_ACCESS_COOKIE,
+      // sameSite: "none",
       // sameSite: "none", // enable this for deployment
     });
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: false, //set to true when deploy
+      // secure: true, //set to true when deploy
       maxAge: EXPIRATION_REFRESH_COOKIE,
-      httpOnly: true,
       // sameSite: "none", // enable this for deployment
     });
   } catch (err) {

@@ -48,25 +48,28 @@ const createSocketServer = (server) => {
       //check if the user has the socketId, if yes connect the user to roomId
     });
     socket.on("sendMessage", async (message) => {
+      message.sender = user._id;
       //save the message
       const newMessage = await saveMessage(message);
       //emit the message to the room
       const { roomId } = message;
-      io.to(roomId).emit("message", message);
+      console.log(newMessage);
+      io.to(roomId).emit("message", newMessage);
     });
 
-    socket.on("typing", (roomId) => {
-      io.to(roomId).emit("isTyping", user);
+    socket.on("typing", ({ roomId, status }) => {
+      io.to(roomId).emit("isTyping", status);
     });
 
     socket.on("disconnect", async () => {
       //remove the user from all the rooms
-      const rooms = io.sockets.adapter.sids[socket.id];
-      rooms.map((room) => {
-        socket.leave(room);
-      });
+      // const rooms = io.sockets.adapter.sids[socket.id];
+      // rooms.map((room) => {
+      //   socket.leave(room);
+      // });
+      console.log("disconnected");
       //remove socketId
-      const disconect = await disconnectUser();
+      const disconect = await disconnectUser(user);
     });
   });
 };
