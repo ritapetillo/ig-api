@@ -29,14 +29,15 @@ postRoutes.get("/", authorizeUser, async (req, res, next) => {
       const user = await UserModel.findById(req.user._id);
       console.log("user", user);
       // const posts = await PostModel.find().populate({path : 'comments', populate: {path: 'userId'}});
-      const posts = await PostModel.find().populate({path: "comments authorId" }).sort({'createdAt': -1});
-      const followingPosts = posts.filter(post =>
-    
-        user.following.includes(post.authorId._id));
-      console.log("followingPosts",followingPosts )
-      if (followingPosts.length > 0) {
-        res.status(200).send(followingPosts);
-      } else res.status(200).json({ message: "no content" });
+      const posts = await PostModel.find()
+        .populate({ path: "comments authorId" })
+        .sort({ createdAt: -1 });
+      const followingPosts = posts.filter((post) =>
+        user.following.includes(post.authorId._id)
+      );
+      console.log("followingPosts", followingPosts);
+
+      res.status(200).send(followingPosts);
     } else throw new ApiError(401, "You are unauthorized.");
   } catch (error) {
     console.log(error);
@@ -49,7 +50,9 @@ postRoutes.get("/me", authorizeUser, async (req, res, next) => {
   try {
     console.log("req.user", req.user);
     if (req.user) {
-      const posts = await PostModel.find({ authorId: req.user._id }).sort({'createdAt': -1});
+      const posts = await PostModel.find({ authorId: req.user._id }).sort({
+        createdAt: -1,
+      });
       if (posts.length > 0) {
         res.status(200).send(posts);
       } else res.status(200).json({ message: "no content" });
@@ -83,7 +86,9 @@ postRoutes.get("/user/:username", async (req, res, next) => {
       const user = await UserModel.findOne({ username: username });
       if (!user) throw new ApiError(404, "no user found");
       {
-        const posts = await PostModel.find({ authorId: user._id }).sort({'createdAt': -1});
+        const posts = await PostModel.find({ authorId: user._id }).sort({
+          createdAt: -1,
+        });
         if (posts.length > 0) {
           res.status(200).send(posts);
         } else res.status(200).json({ message: "no posts from this user" });
@@ -97,11 +102,11 @@ postRoutes.get("/user/:username", async (req, res, next) => {
 
 postRoutes.post(
   "/upload",
-  authorizeUser, validationMiddleware(schemas.PostSchema),
+  authorizeUser,
+  validationMiddleware(schemas.PostSchema),
   upload.single("image"),
   async (req, res, next) => {
     try {
-      
       const user = req.user._id;
       if (user) {
         const image = req.file && req.file.path;
