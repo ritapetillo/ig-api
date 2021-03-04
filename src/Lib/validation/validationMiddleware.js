@@ -3,7 +3,7 @@ const Joi = require("joi");
 const validationMiddleware = (schema, prop) => {
   
   return (req, res, next) => {
-    console.log(req)
+
     const { error } = schema.validate(req.body);
     const valid = error == null;
 
