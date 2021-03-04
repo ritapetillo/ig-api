@@ -60,7 +60,7 @@ postRoutes.get("/me", authorizeUser, async (req, res, next) => {
   }
 });
 
-postRoutes.get("/:postId", async (req, res, next) => {
+postRoutes.get("/user/:postId", async (req, res, next) => {
   try {
     const { postId } = req.params;
     if (postId) {
