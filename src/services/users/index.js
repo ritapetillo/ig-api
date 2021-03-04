@@ -55,7 +55,9 @@ UserRouter.get("/me", authorizeUser, async (req, res, next) => {
   try {
     const { _id } = req.user;
     console.log("req.user", req.user);
-    const currentUser = await UserModel.findById(_id);
+    const currentUser = await UserModel.findById(_id).populate({
+      path: "following followers",
+    });
     console.log(currentUser);
     if (!currentUser) throw error;
     res.status(200).send({ currentUser });
@@ -85,7 +87,7 @@ UserRouter.get("/", async (req, res, next) => {
   try {
     const users = await UserModel.find().populate({
       path: "following followers",
-    });;
+    });
     if (users) {
       res.status(200).send(users);
     } else throw new ApiError(404, "No users found");

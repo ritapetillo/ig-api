@@ -52,6 +52,8 @@ postRoutes.get("/me", authorizeUser, async (req, res, next) => {
     if (req.user) {
       const posts = await PostModel.find({ authorId: req.user._id }).sort({
         createdAt: -1,
+      }).populate({
+        path: "authorId",
       });
 
       res.status(200).send(posts);
@@ -66,7 +68,7 @@ postRoutes.get("/user/:postId", async (req, res, next) => {
   try {
     const { postId } = req.params;
     if (postId) {
-      const post = await PostModel.findOne({ _id: postId });
+      const post = await PostModel.findOne({ _id: postId })
       if (post) {
         res.status(200).send(post);
       } else res.status(200).json({ message: "no content" });
@@ -82,7 +84,9 @@ postRoutes.get("/user/:username", async (req, res, next) => {
   try {
     const { username } = req.params;
     if (username) {
-      const user = await UserModel.findOne({ username: username });
+      const user = await UserModel.findOne({ username: username }).populate({
+        path: "authorId"
+      });
       if (!user) throw new ApiError(404, "no user found");
       {
         const posts = await PostModel.find({ authorId: user._id }).sort({
