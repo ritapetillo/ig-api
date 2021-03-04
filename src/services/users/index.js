@@ -33,14 +33,14 @@ UserRouter.post(
 UserRouter.post(
   "/upload",
   authorizeUser,
-  cloudinaryParser.single("photo"),
+  cloudinaryParser.single("image"),
   async (req, res, next) => {
     const { _id } = req.user;
     try {
       const image = req.file && req.file.path;
       const editedUser = await UserModel.findByIdAndUpdate(
         _id,
-        { $set: { image } },
+        { $set: { imageUrl: image } },
         { runValidators: true, new: true }
       );
       res.status(200).send({ editedUser });
