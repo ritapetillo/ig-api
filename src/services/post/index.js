@@ -53,9 +53,8 @@ postRoutes.get("/me", authorizeUser, async (req, res, next) => {
       const posts = await PostModel.find({ authorId: req.user._id }).sort({
         createdAt: -1,
       });
-      if (posts.length > 0) {
-        res.status(200).send(posts);
-      } else res.status(200).json({ message: "no content" });
+
+      res.status(200).send(posts);
     } else throw new ApiError(401, "You are unauthorized.");
   } catch (error) {
     console.log(error);
@@ -89,9 +88,8 @@ postRoutes.get("/user/:username", async (req, res, next) => {
         const posts = await PostModel.find({ authorId: user._id }).sort({
           createdAt: -1,
         });
-        if (posts.length > 0) {
-          res.status(200).send(posts);
-        } else res.status(200).json({ message: "no posts from this user" });
+
+        res.status(200).send(posts);
       }
     }
   } catch (error) {
