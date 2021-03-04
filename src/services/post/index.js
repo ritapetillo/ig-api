@@ -98,9 +98,10 @@ postRoutes.get("/user/:username", async (req, res, next) => {
 postRoutes.post(
   "/upload",
   authorizeUser, validationMiddleware(schemas.PostSchema),
-  upload.single("photo"),
+  upload.single("image"),
   async (req, res, next) => {
     try {
+      
       const user = req.user._id;
       if (user) {
         const image = req.file && req.file.path;
