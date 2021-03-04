@@ -3,11 +3,13 @@ const ChatRoom = require("../../Models/ChatRoom");
 const roomRouter = express.Router();
 const { findChatsByPartecipants } = require("../../Lib/socket");
 const authorizeUser = require("../../Middlewares/auth");
+const Message = require("../../Models/Message");
 
 //get all chats where user is partecipant
 roomRouter.get("/", authorizeUser, async (req, res, next) => {
   try {
     const { _id } = req.user;
+    console.log("chat", _id);
     const chats = await findChatsByPartecipants(_id);
     res.status(200).send({ chats });
   } catch (err) {
@@ -27,22 +29,43 @@ roomRouter.post("/", authorizeUser, async (req, res, next) => {
     const chatDetails = {
       users: [req.user._id, ...users],
     };
-    console.log(chatDetails);
     const douplicateChat = await ChatRoom.find({
       users: { $size: chatDetails.users.length, $in: chatDetails.users },
     });
-    console.log(douplicateChat);
     if (!douplicateChat.length) {
       const newChat = new ChatRoom(chatDetails);
       const savedChat = await newChat.save();
-      console.log(savedChat);
       res.status(200).send({ chat: savedChat });
     } else {
       res.status(200).send({ chat: douplicateChat });
     }
   } catch (err) {
-    console.log(err);
     const error = new Error(" There was a problem creating the chat");
+    error.code = 404;
+    next(error);
+  }
+});
+
+//get all chats where user is partecipant
+roomRouter.get("/data/:chatId", authorizeUser, async (req, res, next) => {
+  try {
+    const { _id } = req.user;
+    const { chatId } = req.params;
+    const chatRoom = await ChatRoom.findById(chatId).populate({
+      path: "users messages",
+    });
+    const messages = await Message.find({ roomId: chatId });
+    messages.forEach(async (message) => {
+      message.read === true;
+      const newmessage = await message.save();
+
+    });
+
+    if (chatRoom && chatRoom.users.some((user) => user._id == _id)) {
+      res.status(200).send({ chatRoom });
+    } else throw Error;
+  } catch (err) {
+    const error = new Error(" No chat rooms available");
     error.code = 404;
     next(error);
   }
@@ -80,7 +103,6 @@ roomRouter.put(
   async (req, res, next) => {
     try {
       const { chatId, userId } = req.params;
-      console.log(userId);
       const chatRoom = await ChatRoom.findByIdAndUpdate(
         chatId,
         {
@@ -88,7 +110,6 @@ roomRouter.put(
         },
         { runValidators: true, new: true }
       );
-      console.log(chatId);
       res.status(200).send({ chatRoom });
     } catch (err) {
       const error = new Error(

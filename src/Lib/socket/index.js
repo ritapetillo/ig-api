@@ -6,10 +6,10 @@ const saveMessage = async (message) => {
   try {
     const currentRoom = await ChatRoom.findById(message.roomId);
     const newMessage = new Message(message);
-    const savedMessage = await newMessage();
-    currentRoom.messages.push(message._id);
+    const savedMessage = await newMessage.save();
+    currentRoom.messages.push(savedMessage._id);
     await currentRoom.save();
-    return saveMessage;
+    return savedMessage;
     // if (!currentRoom) {
     //     const newRoom = new ChatRoom({
     //         name:
@@ -30,6 +30,7 @@ const disconnectUser = async (user) => {
         new: true,
       }
     );
+    console.log(disconnectedUser);
     return disconnectedUser;
   } catch (err) {
     return null;
@@ -38,7 +39,9 @@ const disconnectUser = async (user) => {
 
 const findChatsByPartecipants = async (id) => {
   try {
-    const chats = await ChatRoom.find({ users: { $in: [id] } });
+    const chats = await ChatRoom.find({ users: { $in: [id] } }).populate({
+      path: "users messages",
+    });
     return chats;
   } catch (err) {
     return null;

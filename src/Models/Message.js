@@ -6,6 +6,7 @@ const MessageSchema = new mongoose.Schema(
     media: String,
     sender: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
     roomId: { type: mongoose.Schema.Types.ObjectId, ref: "chat-rooms" },
+    read: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
