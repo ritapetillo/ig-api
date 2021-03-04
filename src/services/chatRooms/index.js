@@ -30,8 +30,9 @@ roomRouter.post("/", authorizeUser, async (req, res, next) => {
       users: [req.user._id, ...users],
     };
     const douplicateChat = await ChatRoom.find({
-      users: { $size: chatDetails.users.length, $in: chatDetails.users },
+      users: { $all: chatDetails.users },
     });
+    console.log("duplicate" + douplicateChat);
     if (!douplicateChat.length) {
       const newChat = new ChatRoom(chatDetails);
       const savedChat = await newChat.save();
@@ -54,14 +55,16 @@ roomRouter.get("/data/:chatId", authorizeUser, async (req, res, next) => {
     const chatRoom = await ChatRoom.findById(chatId).populate({
       path: "users messages",
     });
-    const messages = await Message.find({ roomId: chatId });
-    messages.forEach(async (message) => {
-      message.read === true;
-      const newmessage = await message.save();
+    console.log(chatRoom);
+    // const messages = await Message.find({ roomId: chatId });
+    // messages.forEach(async (message) => {
+    //   message.read === true;
+    //   const newmessage = await message.save();
 
-    });
-
-    if (chatRoom && chatRoom.users.some((user) => user._id == _id)) {
+    // });
+    const ids = chatRoom.users.map((user) => user._id);
+    console.log(ids);
+    if (chatRoom && ids.includes(_id)) {
       res.status(200).send({ chatRoom });
     } else throw Error;
   } catch (err) {

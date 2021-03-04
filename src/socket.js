@@ -39,12 +39,21 @@ const createSocketServer = (server) => {
     //   });
     // });
 
-    socket.on("addedToChat", async (id, roomId) => {
+    socket.on("addedChat", async ({roomId}) => {
+      console.log("addedChat" + roomId);
+      socket.join(roomId);
       //find the user by id
-      const userToAdd = await User.findById(id);
-      if (userToAdd.socketId) {
-        io.sockets.connected[userToAdd.socketId].join(roomId);
-      }
+      console.log("all-connections" + io.sockets.adapter.sids[socket.id]);
+
+      const findRoom = await ChatRoom.findById(roomId);
+      const allUserInChat = findRoom.users;
+      allUserInChat.users.map(async (user) => {
+        const userToAdd = await User.findById(user._id);
+        if (userToAdd.socketId) {
+          io.sockets.connected[userToAdd.socketId].join(roomId);
+        }
+      });
+
       //check if the user has the socketId, if yes connect the user to roomId
     });
     socket.on("sendMessage", async (message) => {

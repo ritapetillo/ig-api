@@ -54,7 +54,7 @@ UserRouter.post(
 UserRouter.get("/me", authorizeUser, async (req, res, next) => {
   try {
     const { _id } = req.user;
-    console.log("req.user", req.user)
+    console.log("req.user", req.user);
     const currentUser = await UserModel.findById(_id);
     console.log(currentUser);
     if (!currentUser) throw error;
@@ -63,6 +63,21 @@ UserRouter.get("/me", authorizeUser, async (req, res, next) => {
     const err = new Error("Wrong Credentials. Please login again");
     err.code = 401;
     next(err);
+  }
+});
+//GET //api/users
+//GET specific user
+UserRouter.get("/search", async (req, res, next) => {
+  try {
+    console.log("search");
+    const users = await UserModel.find({
+      username: new RegExp(req.query.q, "i"),
+    });
+    console.log(users);
+
+    res.status(200).send({ users });
+  } catch (err) {
+    const error = new Error("There is no user with this id");
   }
 });
 
@@ -179,9 +194,9 @@ UserRouter.get("/:username", async (req, res, next) => {
   try {
     const { username } = req.params;
 
-    const user = await UserModel.findOne({ username })
-      .select("-password")
-      .populate({ path: "following followers" });
+    const user = await UserModel.findOne({ username }).populate({
+      path: "following followers",
+    });
 
     res.status(200).send({ user });
   } catch (err) {

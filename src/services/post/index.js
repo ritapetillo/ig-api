@@ -27,16 +27,17 @@ postRoutes.get("/", authorizeUser, async (req, res, next) => {
   try {
     if (req.user) {
       const user = await UserModel.findById(req.user._id);
-      console.log("user", user)
+      console.log("user", user);
       // const posts = await PostModel.find().populate({path : 'comments', populate: {path: 'userId'}});
-      const posts = await PostModel.find().populate({path: "comments authorId" });
-      const followingPosts = posts.filter(post =>
-    
-        user.following.includes(post.authorId._id));
-      console.log("followingPosts",followingPosts )
-      if (followingPosts.length > 0) {
-        res.status(200).send(followingPosts);
-      } else res.status(200).json({ message: "no content" });
+      const posts = await PostModel.find().populate({
+        path: "comments authorId",
+      });
+      const followingPosts = posts.filter((post) =>
+        user.following.includes(post.authorId._id)
+      );
+      console.log("followingPosts", followingPosts);
+
+      res.status(200).send(followingPosts);
     } else throw new ApiError(401, "You are unauthorized.");
   } catch (error) {
     console.log(error);
@@ -97,7 +98,8 @@ postRoutes.get("/user/:username", async (req, res, next) => {
 
 postRoutes.post(
   "/upload",
-  authorizeUser, validationMiddleware(schemas.PostSchema),
+  authorizeUser,
+  validationMiddleware(schemas.PostSchema),
   upload.single("photo"),
   async (req, res, next) => {
     try {
@@ -120,23 +122,28 @@ postRoutes.post(
   }
 );
 
-postRoutes.put("/:postId", authorizeUser, validationMiddleware(schemas.PostSchema), async (req, res, next) => {
-  //edit post
-  try {
-    if (req.user.username) {
-      const edited_post = await PostModel.findByIdAndUpdate(
-        req.params.postId,
-        req.body,
-        { runValidators: true }
-      );
-      if (edited_post) {
-        res.status(200).send(edited_post);
-      }
-    } else throw new ApiError(401, "You are unauthorized.");
-  } catch (e) {
-    next(e);
+postRoutes.put(
+  "/:postId",
+  authorizeUser,
+  validationMiddleware(schemas.PostSchema),
+  async (req, res, next) => {
+    //edit post
+    try {
+      if (req.user.username) {
+        const edited_post = await PostModel.findByIdAndUpdate(
+          req.params.postId,
+          req.body,
+          { runValidators: true }
+        );
+        if (edited_post) {
+          res.status(200).send(edited_post);
+        }
+      } else throw new ApiError(401, "You are unauthorized.");
+    } catch (e) {
+      next(e);
+    }
   }
-});
+);
 
 postRoutes.delete("/:postId", authorizeUser, async (req, res, next) => {
   //delete post
