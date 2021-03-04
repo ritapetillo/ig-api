@@ -51,7 +51,7 @@ commentRoutes.get("/:postId", async (req, res, next) => {
     if (postId) {
       const post = await PostModel.findOne({ _id: postId }).populate({
         path: "comments",
-      });
+      }).sort({'createdAt': -1});
       console.log("XX Post", post);
       if (post) {
         res.status(200).send(post);
