@@ -55,6 +55,13 @@ const createSocketServer = (server) => {
         .emit("newPostCreated", username);
     });
 
+    socket.on("follow", async ({ userId }) => {
+      const userFollowed = await User.findById(userId);
+      if (userFollowed.socketId) {
+        io.to(userFollowed.socketId).emit("newFollower", user.username);
+      }
+    });
+
     // socket.on("leaveRoom", async () => {
     //   const userRooms = await findChatsByPartecipants(user._id);
     //   userRooms.map((room) => {
