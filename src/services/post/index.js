@@ -80,7 +80,7 @@ postRoutes.get("/user/:postId", async (req, res, next) => {
 });
 
 //gets posts from single user (user feed)
-postRoutes.get("/user/:username", async (req, res, next) => {
+postRoutes.get("/user/all/:username", async (req, res, next) => {
   try {
     const { username } = req.params;
     if (username) {
