@@ -1,4 +1,5 @@
 const express = require("express");
+const http = require("http");
 const server = express();
 const error_handler = require("node-error-handler");
 const cors = require("cors");
@@ -7,7 +8,9 @@ const mongoose = require("mongoose");
 const apiRoutes = require("./services");
 const listEndPoints = require("express-list-endpoints");
 const passport = require("passport");
+const createSocketServer = require("./socket");
 const { PORT } = process.env;
+const httpServer = http.createServer(server);
 require("./Lib/auth/strategies/google");
 require("./Lib/auth/strategies/facebook");
 
@@ -32,6 +35,9 @@ server.use(cookieParser());
 //ROUTE
 server.use("/api", apiRoutes);
 
+//SOCKET IO CONNECTION
+const socketServer = createSocketServer(httpServer);
+
 //ERROR HANDLERS
 server.use(error_handler({ log: true, debug: true }));
 console.log(listEndPoints(server));
@@ -43,7 +49,7 @@ mongoose
     useUnifiedTopology: true,
   })
   .then(() =>
-    server.listen(PORT, () => {
+    httpServer.listen(PORT, () => {
       console.log("server connected at port ", PORT);
     })
   );

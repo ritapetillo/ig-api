@@ -1,6 +1,6 @@
 const { error } = require("console");
 const express = require("express");
-const { generateCookies } = require("../../Lib/auth/cookies");
+const { generateCookies, deleteCookies } = require("../../Lib/auth/cookies");
 const {
   generateTokens,
   verifyAccessToken,
@@ -19,9 +19,11 @@ authRoutes.post("/login", validate(loginSchema), async (req, res, next) => {
   try {
     const { username, password } = req.body;
     const user = await User.findOne({ username });
+    console.log(user);
     if (!user) throw error;
     if (user) {
       const isValid = user.comparePass(password);
+      console.log(isValid);
       //if it's valid, generate jwt
       const tokens = await generateTokens(user);
       //send cookies
@@ -38,7 +40,7 @@ authRoutes.post("/login", validate(loginSchema), async (req, res, next) => {
   }
 });
 
-authRoutes.post("/refresh", authorizeUser, async (req, res, next) => {
+authRoutes.post("/refresh", async (req, res, next) => {
   try {
     //validate and deode refreh token
     const user = await verifyRefreshToken(req);
@@ -58,11 +60,12 @@ authRoutes.post("/refresh", authorizeUser, async (req, res, next) => {
   }
 });
 
-authRoutes.post("/logout", authorizeUser, async (req, res, next) => {
+authRoutes.post("/logout", async (req, res, next) => {
   try {
-    const clearCookies = await clearCookies(res);
-    res.send("Logout");
+    const clearCookies = await deleteCookies(res);
+    res.redirect(`${FE_URI}`);
   } catch (err) {
+    console.log(err);
     const error = new Error("Wrong Credentials");
     error.code = 401;
     next(error);
