@@ -93,6 +93,8 @@ postRoutes.get("/user/all/:username", async (req, res, next) => {
       {
         const posts = await PostModel.find({ authorId: user._id }).sort({
           createdAt: -1,
+        }).populate({
+          path: "comments"
         });
 
         res.status(200).send(posts);
