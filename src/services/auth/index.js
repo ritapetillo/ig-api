@@ -63,7 +63,7 @@ authRoutes.post("/refresh", async (req, res, next) => {
 authRoutes.post("/logout", async (req, res, next) => {
   try {
     const clearCookies = await deleteCookies(res);
-    res.redirect(`${FE_URI}`);
+    res.redirect(`${FE_URI}/login`);
   } catch (err) {
     console.log(err);
     const error = new Error("Wrong Credentials");
