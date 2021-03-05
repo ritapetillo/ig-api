@@ -69,7 +69,7 @@ postRoutes.get("/user/:postId", async (req, res, next) => {
     const { postId } = req.params;
     if (postId) {
       const post = await PostModel.findOne({ _id: postId }).populate({
-        path: "commentId",
+        path: "comments",
       });
       if (post) {
         res.status(200).send(post);
