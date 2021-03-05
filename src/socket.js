@@ -19,6 +19,8 @@ const createSocketServer = (server) => {
 
   io.on("connection", async (socket) => {
     const user = socket.request.user;
+    const currentUser = await User.findById(user._id);
+    const followers = currentUser.followers;
 
     //connect the user to all previous conversations
 
@@ -29,7 +31,35 @@ const createSocketServer = (server) => {
         socket.join(room._id);
       });
 
+      //add all current user followers to followerusername room
+
       console.log(io.sockets.adapter.sids[socket.id]);
+    });
+    socket.on("checkFollowers", async () => {
+      console.log("checfollowers");
+      console.log(followers);
+      followers.map(async (user) => {
+        const userToAdd = await User.findById(user._id);
+        console.log("userToAdd" + userToAdd);
+        if (userToAdd.socketId) {
+          io.sockets.connected[userToAdd.socketId].join(
+            `followers${user.username}`
+          );
+        }
+      });
+    });
+
+    socket.on("newPost", ({ username }) => {
+      socket.broadcast
+        .to(`followers${username}`)
+        .emit("newPostCreated", username);
+    });
+
+    socket.on("follow", async ({ userId }) => {
+      const userFollowed = await User.findById(userId);
+      if (userFollowed.socketId) {
+        io.to(userFollowed.socketId).emit("newFollower", user.username);
+      }
     });
 
     // socket.on("leaveRoom", async () => {
@@ -44,11 +74,14 @@ const createSocketServer = (server) => {
       socket.join(roomId);
       //find the user by id
       console.log("all-connections" + io.sockets.adapter.sids[socket.id]);
-
+      console.log(roomId);
       const findRoom = await ChatRoom.findById(roomId);
       const allUserInChat = findRoom.users;
-      allUserInChat.users.map(async (user) => {
-        const userToAdd = await User.findById(user._id);
+      console.log(allUserInChat);
+      allUserInChat.map(async (user) => {
+        const userToAdd = await User.findById(user);
+        console.log(userToAdd);
+        console.log(userToAdd.socketId);
         if (userToAdd.socketId) {
           io.sockets.connected[userToAdd.socketId].join(roomId);
         }
@@ -69,6 +102,13 @@ const createSocketServer = (server) => {
 
     socket.on("typing", ({ roomId, status }) => {
       io.to(roomId).emit("isTyping", status);
+    });
+    //send follow notification
+    socket.on("follow", async ({ userId }) => {
+      const userFollowed = await User.findById(userId);
+      if (userFollowed.socketId) {
+        io.to(userFollowed.socketId).emit("newFollower", user.username);
+      }
     });
 
     socket.on("disconnect", async () => {
