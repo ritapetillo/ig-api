@@ -88,11 +88,14 @@ roomRouter.put(
         },
         { runValidators: true, new: true }
       );
+      if (chatRoom.users.length == 1) await chatRoom.delete();
+      const deleteMessages = await Message.deleteMany({ roomId: chatRoom._id });
       res.status(200).send({ chatRoom });
     } catch (err) {
       const error = new Error(
         " There was a problem adding the user to the chat"
       );
+      console.log(err);
       error.code = 404;
       next(error);
     }
