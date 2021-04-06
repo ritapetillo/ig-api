@@ -1,5 +1,9 @@
+const Joi = require("joi");
+
 const validationMiddleware = (schema, prop) => {
+  
   return (req, res, next) => {
+
     const { error } = schema.validate(req.body);
     const valid = error == null;
 
@@ -7,7 +11,7 @@ const validationMiddleware = (schema, prop) => {
       next();
     } else {
       const { details } = error;
-      const message = details.map(i => i.message).join(",");
+      const message = details.map((i) => i.message).join(",");
       const err = new Error(message);
       err.code = 400;
       next(err);
